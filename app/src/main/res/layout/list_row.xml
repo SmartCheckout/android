@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <View
+        android:id="@+id/lineView"
+        android:layout_width="match_parent"
+        android:layout_height="2px"
+        android:background="?android:attr/listDivider" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/productDetails"
+        android:layout_marginTop="8dp">
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/axe"
+            android:id="@+id/productIcon"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="8dp"/>
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            >
+            <TextView
+                android:text="Axe Deodrant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:textColor="#455A64"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:id="@+id/productName" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:textColor="#78909C"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_below="@id/productName"
+                android:id="@+id/productDescription"
+                android:layout_marginBottom="16dp"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/productDescription"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="16dp"
+                android:id="@+id/quantity1" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/productDescription"
+                android:layout_toRightOf="@id/quantity1"
+                android:id="@+id/button_delete1"
+                android:text="@string/button_delete" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
