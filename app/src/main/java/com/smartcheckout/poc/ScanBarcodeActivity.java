@@ -1,4 +1,4 @@
-package com.smartcheckout.activities;
+package com.smartcheckout.poc;
 
 import android.Manifest;
 import android.content.Intent;
@@ -17,8 +17,6 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
-
-import activities.smartcheckout.R;
 
 public class ScanBarcodeActivity extends AppCompatActivity {
     private SurfaceView cameraPrieview;
