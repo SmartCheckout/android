@@ -1,24 +1,24 @@
-package com.example.swetha_swaminathan.smartshopper;
+package com.smartcheckout.poc;
 
 /**
  * Created by Swetha_Swaminathan on 2/20/2017.
  */
 
 
-        import java.util.ArrayList;
-        import java.util.HashMap;
-        import java.util.List;
+import android.content.Context;
+import android.graphics.Typeface;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
-        import android.content.Context;
-        import android.graphics.Typeface;
-        import android.view.LayoutInflater;
-        import android.view.View;
-        import android.view.ViewGroup;
-        import android.widget.AdapterView;
-        import android.widget.ArrayAdapter;
-        import android.widget.BaseExpandableListAdapter;
-        import android.widget.Spinner;
-        import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 

@@ -1,4 +1,4 @@
-package com.example.swetha_swaminathan.smartshopper;
+package com.smartcheckout.poc;
 
 import com.google.android.gms.location.places.Place;
 

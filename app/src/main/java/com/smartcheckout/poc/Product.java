@@ -1,4 +1,4 @@
-package com.example.swetha_swaminathan.smartshopper;
+package com.smartcheckout.poc;
 
 /**
  * Created by Swetha_Swaminathan on 2/28/2017.
