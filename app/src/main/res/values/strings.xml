@@ -26,4 +26,7 @@
     <!-- Twitter sign in-->
     <string name="twitter_consumer_key" translatable="false">8tfuwaTi8lXxBA5ougmL0F695</string>
     <string name="twitter_consumer_secret" translatable="false">ArQhWa9RbltWAudIDXzxkboJRsoKbVBcp3rz4mT9mk1qtRn9ro</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
 </resources>
