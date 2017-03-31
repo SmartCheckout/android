@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@android:color/darker_gray"
+    android:descendantFocusability="blocksDescendants"
+    >
+
+
+    <TextView
+        android:id="@+id/lblListHeader"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+        android:textSize="17dp"
+        android:textColor="@color/colorAccent"
+        android:layout_weight="8"
+
+        />
+    <TextView
+        android:id="@+id/qtyHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+        android:textSize="17dp"
+        android:textColor="@color/colorAccent"
+        android:text="Qty:   "
+
+        />
+    <Spinner
+        android:id="@+id/quantity_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorAccent"
+        />
+
+</LinearLayout>

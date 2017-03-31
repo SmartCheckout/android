@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.smartcheckout.poc.MainActivity"
+    tools:showIn="@layout/app_bar_main"
+
+    >
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        class="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10"
+        android:backgroundTint="@color/colorPrimary"
+        android:background="@color/colorPrimaryDark"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="7"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:id="@+id/storeName"
+            android:layout_gravity="left"
+            android:textSize="20sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorAccent"
+            android:visibility="gone"
+            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:layout_gravity="right"
+
+            >
+
+            <RatingBar
+                android:id="@+id/ratings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/ratingBarStyleSmall"
+                android:numStars="5"
+                android:max="5"
+                android:visibility="gone"
+                android:theme="@style/RatingBar"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+<!--
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+        android:weightSum="5"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:textSize="10pt"
+            android:backgroundTint="@color/colorPrimary"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorAccent"
+            android:background="@color/colorPrimaryDark"
+            />
+        <RatingBar
+            android:layout_toRightOf="@+id/storeName"
+            style="?android:attr/ratingBarStyleSmall"
+            android:background="@color/colorPrimaryDark"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:numStars="5"
+            android:stepSize="1"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            />
+</LinearLayout>
+
+!-->
+    <TextView
+        android:layout_below="@+id/storeName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/storeDesc"
+        android:paddingBottom="@dimen/nav_header_vertical_spacing"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:textSize="8pt"
+        android:backgroundTint="@color/colorPrimary"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/colorAccent"
+        android:background="@color/colorPrimaryDark" />
+
+    <ExpandableListView
+        android:id="@+id/lvExp"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+
+
+</LinearLayout>
