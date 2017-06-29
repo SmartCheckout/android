@@ -1,4 +1,4 @@
-package com.smartshopper.androidpoc.activity;
+package com.smartcheckout.poc.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,10 +12,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.barcode.Barcode;
-import com.smartshopper.androidpoc.R;
-import com.smartshopper.androidpoc.adapters.CartListViewAdapter;
-import com.smartshopper.androidpoc.models.CartItem;
-import com.smartshopper.androidpoc.models.Product;
+import com.smartcheckout.poc.R;
+import com.smartcheckout.poc.adapters.CartListViewAdapter;
+import com.smartcheckout.poc.models.CartItem;
+import com.smartcheckout.poc.models.Product;
 
 import java.util.ArrayList;
 
@@ -26,6 +26,7 @@ public class CartActivity extends AppCompatActivity {
 
     private String storeId;
     private String storeDisplay;
+    private static final int RC_SCAN_BARCODE = 0;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -33,13 +34,13 @@ public class CartActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.navigation_home:
+                case R.id.navigation_search:
                     mTextMessage.setText(R.string.title_home);
                     return true;
-                case R.id.navigation_dashboard:
+                case R.id.navigation_cart:
                     mTextMessage.setText(R.string.title_dashboard);
                     return true;
-                case R.id.navigation_notifications:
+                case R.id.navigation_accountSettings:
                     mTextMessage.setText(R.string.title_notifications);
                     return true;
             }
@@ -50,21 +51,23 @@ public class CartActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        System.out.println("Creating Cart activity");
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
         Bundle inputBundle = initiatingIntent.getExtras();
         if(inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplay")){
             storeId = inputBundle.getString("StoreId");
             storeDisplay = inputBundle.getString("StoreDisplay");
-
+            //Set the cart layout
             setContentView(R.layout.activity_cart);
-
+            //Display the address of the store
             ((TextView)findViewById(R.id.storeDetails)).setText(storeDisplay);
             CartListViewAdapter cartListViewAdapter = new CartListViewAdapter(this,new ArrayList<CartItem>());
 
             cartListView = (ListView)findViewById(R.id.cartList);
             cartListView.setAdapter(cartListViewAdapter);
-            ((FloatingActionButton)findViewById(R.id.fabAdd)).setOnClickListener(new View.OnClickListener() {
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabAdd);
+            fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     launchBarcodeScanner();
@@ -83,7 +86,7 @@ public class CartActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Bundle bundle = data.getExtras();
         switch(requestCode){
-            case 0:
+            case RC_SCAN_BARCODE:
                 if(bundle.containsKey("Barcode")){
                     Barcode barcode = bundle.getParcelable("Barcode");
                     System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : "+barcode.displayValue);
@@ -104,7 +107,7 @@ public class CartActivity extends AppCompatActivity {
 
     public void launchBarcodeScanner(){
         Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
-        startActivityForResult(barcodeScanIntent,0);
+        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);
     }
 
 }

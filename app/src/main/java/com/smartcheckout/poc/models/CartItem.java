@@ -1,4 +1,4 @@
-package com.smartshopper.androidpoc.models;
+package com.smartcheckout.poc.models;
 
 /**
  * Created by yeshwanth on 4/4/2017.

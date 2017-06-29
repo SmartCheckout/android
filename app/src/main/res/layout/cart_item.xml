@@ -2,10 +2,10 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.rahul.cartui.MainActivity">
+    tools:context="com.smartcheckout.poc.activity.CartActivity">
 
     <data>
-        <variable name="product" type="com.smartcheckout.poc.models.Product"/>
+        <variable name="cartItem" type="com.smartcheckout.poc.models.CartItem"/>
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -16,7 +16,6 @@
             android:id="@+id/productImg"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:padding="2dp"
@@ -31,7 +30,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{product.title}"
+            android:text="@{cartItem.product.title}"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintLeft_toRightOf="@+id/productImg"
             app:layout_constraintTop_toTopOf="@+id/productImg"
@@ -41,7 +40,7 @@
             android:id="@+id/productDesc"
             style="@style/smallTextFixedLen"
             android:layout_marginTop="8dp"
-            android:text="@{product.description}"
+            android:text="@{cartItem.product.description}"
             app:layout_constraintLeft_toLeftOf="@+id/productTitle"
             app:layout_constraintTop_toBottomOf="@+id/productTitle"
             tools:text="Short Desciption of the product" />
@@ -54,7 +53,7 @@
             android:layout_marginEnd="15dp"
             android:layout_marginRight="8dp"
             android:gravity="center"
-            android:text="@{product.sellingPrice.toString()}"
+            android:text="@{cartItem.product.sellingPrice.toString()}"
             android:textAppearance="@style/TextAppearance.AppCompat"
             app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -93,7 +92,7 @@
             android:layout_marginStart="24dp" />
 
         <NumberPicker
-            android:id="@+id/numberPicker4"
+            android:id="@+id/quantityPicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleX=".75"

@@ -6,54 +6,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:visibility="visible"
     tools:context="com.smartcheckout.poc.activity.CartActivity">
-    <LinearLayout
+
+
+    <TextView
+        android:id="@+id/storeDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#D3D3D3"
-        android:orientation="vertical"
-        >
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="You are shopping at"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
-
-        <TextView
-            android:id="@+id/storeDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="15dp" />
-
-    </LinearLayout>
-
+        android:gravity="center_horizontal"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="Store 1" />
 
     <FrameLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/cartList"/>
+
+        <ListView
+            android:id="@+id/cartList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
 
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
         android:id="@+id/fabAdd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_photo_camera_black_24dp"
         android:visibility="visible"
         app:backgroundTint="@color/colorPrimary" />
 
-    <include layout="@layout/bottom_navigation"/>
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/darker_gray" />
+
+    <include layout="@layout/bottom_navigation" />
 
 </LinearLayout>

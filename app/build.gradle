@@ -18,6 +18,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dataBinding {
+        enabled = true
+    }
+}
+
+repositories {
+    maven {
+        url 'https://maven.google.com'
+    }
 }
 
 dependencies {
@@ -31,8 +40,12 @@ dependencies {
     compile 'com.google.android.gms:play-services-places:10.2.0'
     compile 'com.google.firebase:firebase-auth:10.2.0'
     compile 'com.firebaseui:firebase-ui-auth:1.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 }
+
 
 
 apply plugin: 'com.google.gms.google-services'

@@ -1,4 +1,4 @@
-package com.smartshopper.androidpoc.models;
+package com.smartcheckout.poc.models;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.smartshopper.androidpoc.adapters;
+package com.smartcheckout.poc.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,13 +8,12 @@ import android.widget.BaseAdapter;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-import com.smartshopper.androidpoc.R;
-import com.smartshopper.androidpoc.models.CartItem;
+import com.smartcheckout.poc.R;
+import com.smartcheckout.poc.models.CartItem;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.jar.Pack200;
 
 /**
  * Created by yeshwanth on 4/4/2017.
@@ -94,17 +93,18 @@ public class CartListViewAdapter extends BaseAdapter {
                 }
             });
 
-            ((TextView)view.findViewById(R.id.productTile)).setText(item.getProduct().getTitle());
+            ((TextView)view.findViewById(R.id.productTitle)).setText(item.getProduct().getTitle());
             ((TextView)view.findViewById(R.id.productDesc)).setText(item.getProduct().getDescription());
             ((TextView)view.findViewById(R.id.sellingPrice)).setText(df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
 
             Double savings = item.getQuantity() * item.getProduct().getSavings();
-            if(savings >0){
+            // Check with Yesh whether savings need to be shown at item level
+            /*if(savings >0){
                 ((TextView)view.findViewById(R.id.itemSavings)).setText("Saved : $" + df.format(savings));
                 ((TextView)view.findViewById(R.id.itemSavings)).setVisibility(View.VISIBLE);
             }else{
                 ((TextView)view.findViewById(R.id.itemSavings)).setVisibility(View.GONE);
-            }
+            }*/
 
         }
 

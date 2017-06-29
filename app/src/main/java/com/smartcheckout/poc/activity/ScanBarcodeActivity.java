@@ -1,4 +1,4 @@
-package com.smartshopper.androidpoc.activity;
+package com.smartcheckout.poc.activity;
 
 import android.Manifest;
 import android.content.Intent;
@@ -15,7 +15,7 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.smartshopper.androidpoc.R;
+import com.smartcheckout.poc.R;
 
 import java.io.IOException;
 

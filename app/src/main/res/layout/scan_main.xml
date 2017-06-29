@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.smartcheckout.poc.ScanBarcodeActivity"
+    tools:context="com.smartcheckout.poc.activity.ScanBarcodeActivity"
     >
 
     <SurfaceView

@@ -1,4 +1,4 @@
-package com.smartshopper.androidpoc.activity;
+package com.smartcheckout.poc.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,13 +6,11 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,8 +28,8 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.smartshopper.androidpoc.R;
-import com.smartshopper.androidpoc.models.Store;
+import com.smartcheckout.poc.R;
+import com.smartcheckout.poc.models.Store;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +38,7 @@ import org.json.JSONObject;
 import cz.msebera.android.httpclient.Header;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
 
 /**
  * Created by yeshwanth on 4/5/2017.
@@ -50,22 +49,27 @@ public class StoreSelectionActivity extends Activity implements
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private ImageView locationButton;
-    private LinearLayout confirmationBox;
-    private ProgressBar progressBar;
-    private TextView status;
+    /*private ImageView locationButton;
+    private LinearLayout confirmationBox;*/
+   // private ProgressBar progressBar;
+    //private TextView status;
 
+    private static final int RC_SCAN_BARCODE = 0;
     private static final int RC_LOCATION_PERMISSION = 1;
     private static final int RC_CHECK_SETTING = 2;
-    private static final int RC_SCAN_BARCODE = 0;
+
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private Store selectedStore;
     private boolean storeMatched = false;
     private boolean locationEnabled = false;
     private int locationRetryCount = 0;
     private int locationRetryLimit = 5;
+    private static final String TAG = "StoreSelectionActivity";
 
-
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -94,26 +98,20 @@ public class StoreSelectionActivity extends Activity implements
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
+        setContentView(R.layout.no_loc_store_selection);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
+        setContentView(R.layout.no_loc_store_selection);
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_store_selection);
-        status = (TextView) findViewById(R.id.storeStatus);
-        locationButton = (ImageView) findViewById(R.id.locateMe);
-        confirmationBox = (LinearLayout)findViewById(R.id.locationConfimation);
-        confirmationBox.setVisibility(View.GONE);
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.GONE);
-
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -122,29 +120,10 @@ public class StoreSelectionActivity extends Activity implements
                     .addApi(LocationServices.API)
                     .build();
         }
+        //Connect the google API client
+        mGoogleApiClient.connect();
 
-        ((ImageView)findViewById(R.id.scanStoreQR)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchScanBarcode();
-            }
-        });
 
-        ((ImageView)findViewById(R.id.locateMe)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mGoogleApiClient.connect();
-
-            }
-        });
-
-        findViewById(R.id.confirmLocationBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchCartActivity();
-
-            }
-        });
 
 
     }
@@ -167,6 +146,17 @@ public class StoreSelectionActivity extends Activity implements
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bundle bundle = data.getExtras();
@@ -178,7 +168,7 @@ public class StoreSelectionActivity extends Activity implements
                     findStoreByBarcode(barcode.displayValue);
                 }
                 break;
-            case RC_CHECK_SETTING: // Response from enabling location dialog box
+            case RC_CHECK_SETTING: // Response from location enabled
                 switch (resultCode) {
                     case Activity.RESULT_OK:
                         locationEnabled = true;
@@ -197,6 +187,10 @@ public class StoreSelectionActivity extends Activity implements
             case RC_LOCATION_PERMISSION:
                 if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     startLocationUpdates();
+                }
+                else  {
+                    ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_perm_denied);
+                    setContentView(R.layout.no_loc_store_selection);
                 }
         }
     }
@@ -225,12 +219,18 @@ public class StoreSelectionActivity extends Activity implements
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
                             status.startResolutionForResult(StoreSelectionActivity.this,RC_CHECK_SETTING);
+                            ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
+                            setContentView(R.layout.no_loc_store_selection);
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
+                            ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
+                            setContentView(R.layout.no_loc_store_selection);
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         System.out.println("Resolution not possible");
+                        ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
+                        setContentView(R.layout.no_loc_store_selection);
                         break;
                 }
             }
@@ -238,34 +238,49 @@ public class StoreSelectionActivity extends Activity implements
 
     }
 
-   public void findStoreByLocation(final Location location){
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+    }
+
+    public void findStoreByLocation(final Location location){
           if(location!=null && !storeMatched) {
               if (locationRetryCount < locationRetryLimit) {
-                  System.out.println("Location Update Received : "+ location.getLatitude() + " : " + location.getLongitude());
-                  String locSearchEP = " http://5b33f7c6.ngrok.io/store/locationsearch";
+                  Log.d(TAG,"Location Update Received : "+ location.getLatitude() + " : " + location.getLongitude());
+                  String locSearchEP = getString(R.string.storeSearchURL);
                   RequestParams params = new RequestParams();
-                  params.put("lattitude", location.getLatitude());
-                  params.put("longitude", location.getLongitude());
+                  // ****Needs to be uncommented for getting the actual location
+                  /*params.put("lattitude", location.getLatitude());
+                  params.put("longitude", location.getLongitude());*/
+                  // ****Hard coding latitude and longitude for proceeding with dev
+                  System.out.println("Sending request to store location");
+                  params.put("lattitude", 25);
+                  params.put("longitude", -25);
                   params.put("context", "STORE_IN_CURRENT_LOC");
 
-                  progressBar.setVisibility(View.VISIBLE);
-                  confirmationBox.setVisibility(View.GONE);
+                 // progressBar.setVisibility(View.VISIBLE);
+                 // confirmationBox.setVisibility(View.GONE);
 
                   ahttpClient.get(locSearchEP, params, new JsonHttpResponseHandler() {
 
                       @Override
                       public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-
+                          System.out.println("Before try block");
                           try {
+                              // Unique store found
                               if (response.length() == 1) {
                                   selectedStore = new Store();
                                   JSONObject store = response.getJSONObject(0);
-                                  selectedStore.setDisplayAddress(store.getString("displayAddress"));
+                                  System.out.println("Display address -->"+store.getString("displayAddress"));
+                                  System.out.println("Store ID -->"+store.getString("id"));
+                                  System.out.println("Setting display address and store Id");
+                                  selectedStore.setDisplayAddress(store.getString("title"));
                                   selectedStore.setId(store.getString("id"));
-                                  status.setText(selectedStore.getDisplayAddress() + "\nCurrent Loc :" + location.getLatitude() + " : " + location.getLongitude());
-
-                                  confirmationBox.setVisibility(View.VISIBLE);
-                                  progressBar.setVisibility(View.GONE);
+                                 // status.setText(selectedStore.getDisplayAddress() + "\nCurrent Loc :" + location.getLatitude() + " : " + location.getLongitude());
+                                  System.out.println("Before launching cart activity");
+                                  launchCartActivity();
+                                  //confirmationBox.setVisibility(View.VISIBLE);
+                                  //progressBar.setVisibility(View.GONE);
                               }
                           } catch (JSONException je) {
                               je.printStackTrace();
@@ -279,10 +294,13 @@ public class StoreSelectionActivity extends Activity implements
               }else{
                   LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, StoreSelectionActivity.this);
                   locationRetryCount = 0;
+                  ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
+                  setContentView(R.layout.no_loc_store_selection);
 
-                  progressBar.setVisibility(View.GONE);
-                  confirmationBox.setVisibility(View.VISIBLE);
-                  status.setText("Unable to find store with location. Try with QR code option");
+                  //progressBar.setVisibility(View.GONE);
+                  //confirmationBox.setVisibility(View.VISIBLE);
+                  //status.setText("Unable to find store with location. Try with QR code option");
+                  // Need to add code for QR code
 
               }
           }
@@ -296,8 +314,8 @@ public class StoreSelectionActivity extends Activity implements
         barcodeSearchEP = String.format(barcodeSearchEP, barcode);
         System.out.println(barcodeSearchEP);
 
-        progressBar.setVisibility(View.VISIBLE);
-        confirmationBox.setVisibility(View.GONE);
+        //progressBar.setVisibility(View.VISIBLE);
+        //confirmationBox.setVisibility(View.GONE);
 
         ahttpClient.get(barcodeSearchEP, new JsonHttpResponseHandler() {
 
@@ -307,10 +325,10 @@ public class StoreSelectionActivity extends Activity implements
                 try{
                     selectedStore.setDisplayAddress(response.getString("displayAddress"));
                     selectedStore.setId(response.getString("id"));
-                    status.setText(selectedStore.getDisplayAddress());
-
-                    progressBar.setVisibility(View.GONE);
-                    confirmationBox.setVisibility(View.VISIBLE);
+                    //status.setText(selectedStore.getDisplayAddress());
+                    launchScanBarcode();
+                    //progressBar.setVisibility(View.GONE);
+                    //confirmationBox.setVisibility(View.VISIBLE);
                 }catch(JSONException je ){
                     je.printStackTrace();
                 }catch(Exception e){
@@ -332,17 +350,18 @@ public class StoreSelectionActivity extends Activity implements
     }
 
     public void launchCartActivity(){
+        System.out.println("Launching cart activity");
         if(selectedStore!=null){
+            System.out.println("Launching cart activity");
             Intent cartActivityIntent = new Intent(this,CartActivity.class);
             cartActivityIntent.putExtra("StoreDisplay", selectedStore.getDisplayAddress());
             cartActivityIntent.putExtra("StoreId",selectedStore.getId());
-
             startActivity(cartActivityIntent);
         }
 
     }
 
-
+    // Call back handler for receiving location updates
     @Override
     public void onLocationChanged(Location location) {
 
@@ -350,4 +369,6 @@ public class StoreSelectionActivity extends Activity implements
         locationRetryCount++;
         findStoreByLocation(location);
     }
+
+
 }
