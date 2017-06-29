@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.smartshopper.androidpoc.activity.CartActivity">
+    tools:context="com.smartcheckout.poc.activity.CartActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,13 +54,6 @@
         android:visibility="visible"
         app:backgroundTint="@color/colorPrimary" />
 
-
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="?android:attr/windowBackground"
-        app:menu="@menu/navigation" />
+    <include layout="@layout/bottom_navigation"/>
 
 </LinearLayout>
