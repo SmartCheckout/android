@@ -52,7 +52,13 @@
     <string name="cart">cart</string>
     <string name="search">search</string>
     <string name="storeSearchURL">http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/store/locationsearch</string>
+    <string name="productSearchURL">http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/product</string>
     <string name="no_loc_scan_qr_store">Unable to find Location. Please scan store QR code</string>
     <string name="no_loc_perm_denied">Please scan store QR code</string>
     <string name="scan_store_qr_button">Scan Store QR</string>
+    <string-array name="payment_method">
+        <item>MasterCard **** 2200</item>
+        <item>PaytM ****1180</item>
+        <item>Visa *****3204</item>
+    </string-array>
 </resources>

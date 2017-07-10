@@ -250,14 +250,13 @@ public class StoreSelectionActivity extends Activity implements
                   String locSearchEP = getString(R.string.storeSearchURL);
                   RequestParams params = new RequestParams();
                   // ****Needs to be uncommented for getting the actual location
-                  /*params.put("lattitude", location.getLatitude());
-                  params.put("longitude", location.getLongitude());*/
+                  params.put("lattitude", location.getLatitude());
+                  params.put("longitude", location.getLongitude());
                   // ****Hard coding latitude and longitude for proceeding with dev
-                  System.out.println("Sending request to store location");
-                  params.put("lattitude", 25);
-                  params.put("longitude", -25);
+                 // params.put("lattitude", 25);
+                  //params.put("longitude", -25);
                   params.put("context", "STORE_IN_CURRENT_LOC");
-
+                  System.out.println("Sending request to store location");
                  // progressBar.setVisibility(View.VISIBLE);
                  // confirmationBox.setVisibility(View.GONE);
 
@@ -274,7 +273,7 @@ public class StoreSelectionActivity extends Activity implements
                                   System.out.println("Display address -->"+store.getString("displayAddress"));
                                   System.out.println("Store ID -->"+store.getString("id"));
                                   System.out.println("Setting display address and store Id");
-                                  selectedStore.setDisplayAddress(store.getString("title"));
+                                  selectedStore.setDisplayAddress(store.getString("displayAddress"));
                                   selectedStore.setId(store.getString("id"));
                                  // status.setText(selectedStore.getDisplayAddress() + "\nCurrent Loc :" + location.getLatitude() + " : " + location.getLongitude());
                                   System.out.println("Before launching cart activity");

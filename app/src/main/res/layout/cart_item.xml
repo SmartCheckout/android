@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.smartcheckout.poc.activity.CartActivity">
 
-    <data>
+  <!--  <data>
         <variable name="cartItem" type="com.smartcheckout.poc.models.CartItem"/>
-    </data>
+    </data> -->
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{cartItem.product.title}"
+            android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintLeft_toRightOf="@+id/productImg"
             app:layout_constraintTop_toTopOf="@+id/productImg"
@@ -40,7 +40,7 @@
             android:id="@+id/productDesc"
             style="@style/smallTextFixedLen"
             android:layout_marginTop="8dp"
-            android:text="@{cartItem.product.description}"
+            android:text=""
             app:layout_constraintLeft_toLeftOf="@+id/productTitle"
             app:layout_constraintTop_toBottomOf="@+id/productTitle"
             tools:text="Short Desciption of the product" />
@@ -53,7 +53,7 @@
             android:layout_marginEnd="15dp"
             android:layout_marginRight="8dp"
             android:gravity="center"
-            android:text="@{cartItem.product.sellingPrice.toString()}"
+            android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat"
             app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -92,7 +92,7 @@
             android:layout_marginStart="24dp" />
 
         <NumberPicker
-            android:id="@+id/quantityPicker"
+            android:id="@+id/quantity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleX=".75"

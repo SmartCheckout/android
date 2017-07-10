@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -12,6 +13,7 @@ import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.CartItem;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,37 +23,53 @@ import java.util.List;
 
 public class CartListViewAdapter extends BaseAdapter {
 
+    // View lookup cache
+    private static class ViewHolder {
+        ImageView productImg;
+        TextView productTitle;
+        TextView productDesc;
+        TextView sellingPrice;
+        NumberPicker quantity;
+    }
+
     private Context context;
     private List<CartItem> cartItemList;
-    private LayoutInflater inflater;
-    private HashMap<String,CartItem> itemTracker;
+    private HashMap<String, CartItem> itemTracker;
 
+    //Creates an adapter from an already defined list
     public CartListViewAdapter(Context context, List<CartItem> cartItemList) {
         this.cartItemList = cartItemList;
         this.context = context;
         itemTracker = new HashMap<>();
-        for(CartItem item : cartItemList){
-            itemTracker.put(item.getProduct().getBarcode(),item);
+        for (CartItem item : cartItemList) {
+            itemTracker.put(item.getProduct().getBarcode(), item);
         }
-        inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public CartItem findItemInCart(CartItem cartItem){
+    //Creates an adapter with a new list
+    public CartListViewAdapter(Context context) {
+        this.context = context;
+        this.cartItemList = new ArrayList<CartItem>();
+        itemTracker = new HashMap<>();
+    }
+
+    public CartItem findItemInCart(CartItem cartItem) {
         return itemTracker.get(cartItem.getProduct().getBarcode());
     }
 
-    public void addItem(int position,CartItem cartItem){
+    public void addItem(CartItem cartItem) {
         CartItem iteminCart = findItemInCart(cartItem);
-        if(iteminCart == null){
-            cartItemList.add(position,cartItem);
-            itemTracker.put(cartItem.getProduct().getBarcode(),cartItem);
-        }else{
+        if (iteminCart == null) {
+            cartItemList.add(cartItem);
+            itemTracker.put(cartItem.getProduct().getBarcode(), cartItem);
+        } else {
             int currentQty = iteminCart.getQuantity();
-            iteminCart.setQuantity(currentQty+cartItem.getQuantity());
+            iteminCart.setQuantity(currentQty + cartItem.getQuantity());
         }
 
         notifyDataSetChanged();
     }
+
     @Override
     public int getCount() {
         return cartItemList.size();
@@ -59,7 +77,7 @@ public class CartListViewAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        if(i < cartItemList.size())
+        if (i < cartItemList.size())
             return cartItemList.get(i);
         else
             return null;
@@ -71,20 +89,44 @@ public class CartListViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if(view == null)
-           view = inflater.inflate(R.layout.cart_item,null);
+    public View getView(int position, View view, ViewGroup parent) {
+        ViewHolder viewHolder;
 
-        final CartItem item = (CartItem)getItem(i);
-        if(item!=null){
+        //Get the cart item for this position
+        final CartItem item = (CartItem) getItem(position);
+
+        if (item != null) {
+
+        if (view == null) {
+            // If there's no view to re-use, inflate a brand new view for row
+
+            LayoutInflater inflater = LayoutInflater.from(view.getContext());
+            view = inflater.inflate(R.layout.cart_item, parent, false);
+            viewHolder = new ViewHolder();
+
+            viewHolder.productImg = (ImageView) view.findViewById(R.id.productImg);
+            viewHolder.productTitle = (TextView) view.findViewById(R.id.productTitle);
+            viewHolder.productDesc = (TextView) view.findViewById(R.id.productDesc);
+            viewHolder.quantity = (NumberPicker) view.findViewById(R.id.quantity);
+            viewHolder.sellingPrice = (TextView) view.findViewById(R.id.sellingPrice);
+            // Cache the viewHolder object inside the fresh view
+            view.setTag(viewHolder);
+        } else {
+            // View is being recycled, retrieve the viewHolder object from tag
+            viewHolder = (ViewHolder) view.getTag();
+        }
+
+
             DecimalFormat df = new DecimalFormat("#.00");
 
-            //Populate product details
-            NumberPicker qtyPicker  = (NumberPicker)view.findViewById(R.id.quantityPicker);
-            qtyPicker.setMinValue(1);
-            qtyPicker.setMaxValue(25);
-            qtyPicker.setValue(item.getQuantity());
-            qtyPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            //Populate product details ** Need to set image...discuss with Yesh
+            viewHolder.productTitle.setText(item.getProduct().getTitle());
+            viewHolder.productDesc.setText(item.getProduct().getDescription());
+            viewHolder.sellingPrice.setText(df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
+            viewHolder.quantity.setMinValue(1);
+            viewHolder.quantity.setMaxValue(25);
+            viewHolder.quantity.setValue(item.getQuantity());
+            viewHolder.quantity.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                 @Override
                 public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
                     item.setQuantity(newVal);
@@ -93,11 +135,6 @@ public class CartListViewAdapter extends BaseAdapter {
                 }
             });
 
-            ((TextView)view.findViewById(R.id.productTitle)).setText(item.getProduct().getTitle());
-            ((TextView)view.findViewById(R.id.productDesc)).setText(item.getProduct().getDescription());
-            ((TextView)view.findViewById(R.id.sellingPrice)).setText(df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
-
-            Double savings = item.getQuantity() * item.getProduct().getSavings();
             // Check with Yesh whether savings need to be shown at item level
             /*if(savings >0){
                 ((TextView)view.findViewById(R.id.itemSavings)).setText("Saved : $" + df.format(savings));
@@ -106,8 +143,14 @@ public class CartListViewAdapter extends BaseAdapter {
                 ((TextView)view.findViewById(R.id.itemSavings)).setVisibility(View.GONE);
             }*/
 
+
         }
 
+
         return view;
+    }
+
+    public List<CartItem> getCartItemList() {
+        return cartItemList;
     }
 }
