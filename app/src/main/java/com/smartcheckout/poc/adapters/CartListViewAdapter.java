@@ -100,7 +100,7 @@ public class CartListViewAdapter extends BaseAdapter {
         if (view == null) {
             // If there's no view to re-use, inflate a brand new view for row
 
-            LayoutInflater inflater = LayoutInflater.from(view.getContext());
+            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.cart_item, parent, false);
             viewHolder = new ViewHolder();
 

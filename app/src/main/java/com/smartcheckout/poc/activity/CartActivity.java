@@ -18,12 +18,10 @@ import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
-import com.smartcheckout.poc.util.PropertiesUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -193,21 +191,13 @@ public class CartActivity extends AppCompatActivity {
 
     public Bill createBill() {
 
-        Bill bill = new Bill();
-        float taxRate = 0;
-        try {
-            taxRate = Float.parseFloat(PropertiesUtil.getProperty("taxRate",getApplicationContext()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         List<CartItem> cartList  = cartAdapter.getCartItemList();
+        float totalAmount=0,savings=0;
         for (CartItem cartItem : cartList) {
-            bill.totalAmount += cartItem.getQuantity()*cartItem.getProduct().getRetailPrice();
-            bill.savings += cartItem.getProduct().getSavings();
+            totalAmount += cartItem.getQuantity()*cartItem.getProduct().getRetailPrice();
+            savings += cartItem.getProduct().getSavings();
         }
-        bill.taxes = bill.totalAmount*(1-taxRate);
-        bill.amountPaid = bill.getTotalAmount() - bill.getSavings() - bill.getTaxes();
-        return bill;
+        return new Bill(totalAmount,savings);
 
     }
     public void launchBarcodeScanner(){
