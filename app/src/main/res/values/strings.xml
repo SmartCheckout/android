@@ -54,8 +54,11 @@
     <string name="storeSearchURL">http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/store/locationsearch</string>
     <string name="productSearchURL">http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/product</string>
     <string name="no_loc_scan_qr_store">Unable to find Location. Please scan store QR code</string>
-    <string name="no_loc_perm_denied">Please scan store QR code</string>
+    <string name="no_loc_perm_denied">Since we cannot access your location please scan store QR code to allow us to find which store you are at</string>
     <string name="scan_store_qr_button">Scan Store QR</string>
+    <string name="no_loc_message">Sorry we are unable to find which store you are at. Please allow us to try once more or scan the store\'s QR code </string>
+    <string name="no_connection_message">There was a connection failure and we could not find which store you are at. Please allow us to try once more or scan the store\'s QR code </string>
+    <string name="find_location_button">Find Location</string>
     <string-array name="payment_method">
         <item>MasterCard **** 2200</item>
         <item>PaytM ****1180</item>

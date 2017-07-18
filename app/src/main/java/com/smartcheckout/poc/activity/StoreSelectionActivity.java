@@ -11,6 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -49,14 +52,14 @@ public class StoreSelectionActivity extends Activity implements
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    /*private ImageView locationButton;
-    private LinearLayout confirmationBox;*/
-   // private ProgressBar progressBar;
-    //private TextView status;
+     private ProgressBar progressBar;
 
-    private static final int RC_SCAN_BARCODE = 0;
+
     private static final int RC_LOCATION_PERMISSION = 1;
     private static final int RC_CHECK_SETTING = 2;
+
+   // private static final int RC_SCAN_BARCODE_PROD = 100;
+    private static final int RC_SCAN_BARCODE_STORE = 200;
 
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private Store selectedStore;
@@ -73,6 +76,7 @@ public class StoreSelectionActivity extends Activity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        System.out.println("In on Connected() --> Google APi client");
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(5000)
@@ -98,34 +102,23 @@ public class StoreSelectionActivity extends Activity implements
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
-        setContentView(R.layout.no_loc_store_selection);
+        System.out.println("In on ConnectionFailed() --> Google APi client");
+        createNoLocView(getResources().getString(R.string.no_connection_message));
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
-        setContentView(R.layout.no_loc_store_selection);
+        System.out.println("In on ConnectionSuspended() --> Google APi client");
+        createNoLocView(getResources().getString(R.string.no_connection_message));
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
+        setTheme(R.style.SplashTheme);
         super.onCreate(savedInstanceState);
-
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-        //Connect the google API client
-        mGoogleApiClient.connect();
-
-
-
-
+        //Conenct Google API client. Will receive call back. See appropriate method for success or faliure
+        connectGoogleApiClient();
     }
 
     @Override
@@ -144,7 +137,7 @@ public class StoreSelectionActivity extends Activity implements
         ahttpClient.cancelAllRequests(true);
 
     }
-
+    // Need to add code for on Pause and on Resume
     @Override
     protected void onPause() {
         super.onPause();
@@ -161,10 +154,10 @@ public class StoreSelectionActivity extends Activity implements
         super.onActivityResult(requestCode, resultCode, data);
         Bundle bundle = data.getExtras();
         switch (requestCode) {
-            case RC_SCAN_BARCODE:
+            case RC_SCAN_BARCODE_STORE:
                 if (bundle.containsKey("Barcode")) {
                     Barcode barcode = bundle.getParcelable("Barcode");
-                    System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
+                    Log.d(TAG,"=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
                     findStoreByBarcode(barcode.displayValue);
                 }
                 break;
@@ -189,8 +182,7 @@ public class StoreSelectionActivity extends Activity implements
                     startLocationUpdates();
                 }
                 else  {
-                    ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_perm_denied);
-                    setContentView(R.layout.no_loc_store_selection);
+                    createNoLocView(getResources().getString(R.string.no_loc_perm_denied));
                 }
         }
     }
@@ -219,18 +211,14 @@ public class StoreSelectionActivity extends Activity implements
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
                             status.startResolutionForResult(StoreSelectionActivity.this,RC_CHECK_SETTING);
-                            ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
-                            setContentView(R.layout.no_loc_store_selection);
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
-                            ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
-                            setContentView(R.layout.no_loc_store_selection);
+                          Log.d(TAG,e.getLocalizedMessage());
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         System.out.println("Resolution not possible");
-                        ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
-                        setContentView(R.layout.no_loc_store_selection);
+                        createNoLocView(getResources().getString(R.string.no_loc_message));
                         break;
                 }
             }
@@ -245,26 +233,19 @@ public class StoreSelectionActivity extends Activity implements
 
     public void findStoreByLocation(final Location location){
           if(location!=null && !storeMatched) {
-              if (locationRetryCount < locationRetryLimit) {
                   Log.d(TAG,"Location Update Received : "+ location.getLatitude() + " : " + location.getLongitude());
                   String locSearchEP = getString(R.string.storeSearchURL);
                   RequestParams params = new RequestParams();
-                  // ****Needs to be uncommented for getting the actual location
                   params.put("lattitude", location.getLatitude());
                   params.put("longitude", location.getLongitude());
-                  // ****Hard coding latitude and longitude for proceeding with dev
-                 // params.put("lattitude", 25);
-                  //params.put("longitude", -25);
                   params.put("context", "STORE_IN_CURRENT_LOC");
                   System.out.println("Sending request to store location");
-                 // progressBar.setVisibility(View.VISIBLE);
-                 // confirmationBox.setVisibility(View.GONE);
-
+                  ahttpClient.setMaxRetriesAndTimeout(3,1000);
                   ahttpClient.get(locSearchEP, params, new JsonHttpResponseHandler() {
 
                       @Override
                       public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                          System.out.println("Before try block");
+                          System.out.println("In onSuccess SelectStore");
                           try {
                               // Unique store found
                               if (response.length() == 1) {
@@ -275,11 +256,8 @@ public class StoreSelectionActivity extends Activity implements
                                   System.out.println("Setting display address and store Id");
                                   selectedStore.setDisplayAddress(store.getString("displayAddress"));
                                   selectedStore.setId(store.getString("id"));
-                                 // status.setText(selectedStore.getDisplayAddress() + "\nCurrent Loc :" + location.getLatitude() + " : " + location.getLongitude());
                                   System.out.println("Before launching cart activity");
                                   launchCartActivity();
-                                  //confirmationBox.setVisibility(View.VISIBLE);
-                                  //progressBar.setVisibility(View.GONE);
                               }
                           } catch (JSONException je) {
                               je.printStackTrace();
@@ -289,19 +267,16 @@ public class StoreSelectionActivity extends Activity implements
 
 
                       }
+
+                      public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errResponse) {
+                          System.out.println("In onFaliure SelectStore");
+                          Log.d(TAG,statusCode+" "+errResponse,throwable);
+                          LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, StoreSelectionActivity.this);
+                          createNoLocView(getResources().getString(R.string.no_loc_message));
+
+                      }
                   });
-              }else{
-                  LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, StoreSelectionActivity.this);
-                  locationRetryCount = 0;
-                  ((TextView)findViewById(R.id.no_loc_message)).setText(R.string.no_loc_scan_qr_store);
-                  setContentView(R.layout.no_loc_store_selection);
 
-                  //progressBar.setVisibility(View.GONE);
-                  //confirmationBox.setVisibility(View.VISIBLE);
-                  //status.setText("Unable to find store with location. Try with QR code option");
-                  // Need to add code for QR code
-
-              }
           }
 
     }
@@ -312,9 +287,9 @@ public class StoreSelectionActivity extends Activity implements
         String barcodeSearchEP = "http://5b33f7c6.ngrok.io/store/barcodesearch/%s";
         barcodeSearchEP = String.format(barcodeSearchEP, barcode);
         System.out.println(barcodeSearchEP);
+        progressBar = (ProgressBar) findViewById(R.id.progressBarStoreScan);
 
-        //progressBar.setVisibility(View.VISIBLE);
-        //confirmationBox.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
 
         ahttpClient.get(barcodeSearchEP, new JsonHttpResponseHandler() {
 
@@ -324,10 +299,8 @@ public class StoreSelectionActivity extends Activity implements
                 try{
                     selectedStore.setDisplayAddress(response.getString("displayAddress"));
                     selectedStore.setId(response.getString("id"));
-                    //status.setText(selectedStore.getDisplayAddress());
-                    launchScanBarcode();
-                    //progressBar.setVisibility(View.GONE);
-                    //confirmationBox.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                    launchCartActivity();
                 }catch(JSONException je ){
                     je.printStackTrace();
                 }catch(Exception e){
@@ -342,10 +315,10 @@ public class StoreSelectionActivity extends Activity implements
     }
 
 
-    //Methods to launch applications activities
-    public void launchScanBarcode(){
+    //Methods to launch applications activities. scanType should be a predefined constant for store or product(i.e.RC_SCAN_BARCODE_STORE etc.)
+    public void launchScanBarcode(int scanType){
         Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
-        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);
+        startActivityForResult(barcodeScanIntent, scanType);
     }
 
     public void launchCartActivity(){
@@ -367,6 +340,55 @@ public class StoreSelectionActivity extends Activity implements
         System.out.println("Location Update received. Accuracy : "+ location.getAccuracy());
         locationRetryCount++;
         findStoreByLocation(location);
+    }
+
+    //Create the no location view
+    public void createNoLocView(String message) {
+        setTheme(R.style.AppTheme);
+        setContentView(R.layout.no_loc_store_selection);
+        ((TextView)findViewById(R.id.noLocMessage)).setText(message);
+        //Set listener for the on store listener
+        Button scanQRStore = (Button) findViewById(R.id.scanQrStore);
+        scanQRStore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchScanBarcode(RC_SCAN_BARCODE_STORE);
+
+
+            }
+        });
+
+        Button findLocation = (Button) findViewById(R.id.findLocation);
+        findLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("Clicked find location");
+                connectGoogleApiClient();
+            }
+        });
+/*
+        findViewById(R.id.findLocation).setOnClickListener();
+        if(viewId ==  R.layout.no_loc_store_selection) {
+
+        }*/
+    }
+
+    public void connectGoogleApiClient() {
+        System.out.println("In connectGoogleApiClient()");
+
+        if (mGoogleApiClient == null) {
+            System.out.println("GoogleApiClient null....Creating client");
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+        //Connect the google API client
+        System.out.println("GoogleApiClient not null");
+        mGoogleApiClient.connect();
+        System.out.println("Connection done");
+
     }
 
 
