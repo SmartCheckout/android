@@ -13,24 +13,30 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class Bill {
 
-    private float totalAmount; // Total amount by adding MRP of all itens in the cart
+    private float sumSellPrice; // Total amount by adding MRP of all itens in the cart
     private float savings;     // Total savings by calculating the disounts and offers
     private float tax;       // T
-    private float amountPaid; //Final amount to be paid
+   private float totalAmountPaid; //Final amount to be paid
 
-    public Bill(float totalAmount, float savings) {
-        this.totalAmount = totalAmount;
+    public Bill(float sumSellPrice, float savings) {
+        this.sumSellPrice = sumSellPrice;
         this.savings = savings;
-        calTax();
-        calAmountPaid();
     }
 
-    public float getTotalAmount() {
+    /*public float getTotalAmount() {
         return round(this.totalAmount,2);
     }
 
     public void setTotalAmount(float totalAmount) {
         this.totalAmount = totalAmount;
+    }
+*/
+    public float getSumSellPrice() {
+        return round(this.sumSellPrice,2);
+    }
+
+    public void setSumSellPrice(float sumSellPrice) {
+        this.sumSellPrice = sumSellPrice;
     }
 
     public float getSavings() {
@@ -41,9 +47,7 @@ public class Bill {
         this.savings = savings;
     }
 
-    public float getTax() {
-       return round(this.tax,2);
-    }
+
 
     private void calTax() {
 
@@ -53,18 +57,22 @@ public class Bill {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.tax = this.totalAmount*(1-taxRate);
+        this.tax = this.sumSellPrice*(1-taxRate);
 
     }
 
-    public float getAmountPaid() {
-        return round(this.amountPaid,2);
-    }
-
-    public void calAmountPaid() {
+    public float calTotalAMountPaid() {
         calTax();
-        this.amountPaid = this.getTotalAmount() - this.getSavings() - this.getTax();
+        this.totalAmountPaid = this.sumSellPrice + this.tax;
+        return round(totalAmountPaid, 2);
+
     }
+
+
+
+
+
+
 
     private float round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));

@@ -157,13 +157,13 @@ public class CartActivity extends AppCompatActivity {
                 try {
                     // Unique product found
 
-                        System.out.println("Product unique id -->"+response.getString("uniqueId"));
+                        /*System.out.println("Product unique id -->"+response.getString("uniqueId"));
                         System.out.println("Product barcode -->"+response.getString("barcode"));
                         System.out.println("Product title -->"+response.getString("title"));
                         System.out.println("Product description -->"+response.getString("description"));
                         System.out.println("Product category -->"+response.getString("category"));
                         System.out.println("Product retailPrice -->"+response.getDouble("retailPrice"));
-                        System.out.println("Product retailPrice -->"+response.getDouble("discount"));
+                        System.out.println("Product retailPrice -->"+response.getDouble("discount"));*/
                         Product product = new Product(response.getString("uniqueId"),
                                 response.getString("barcode"),
                                 response.getString("title"),
@@ -195,8 +195,10 @@ public class CartActivity extends AppCompatActivity {
         List<CartItem> cartList  = cartAdapter.getCartItemList();
         float totalAmount=0,savings=0;
         for (CartItem cartItem : cartList) {
-            totalAmount += cartItem.getQuantity()*cartItem.getProduct().getRetailPrice();
-            savings += cartItem.getProduct().getSavings();
+            System.out.println("cart item price -->"+cartItem.getProduct().getSellingPrice());
+            System.out.println("cart item quantity -->"+cartItem.getQuantity());
+            totalAmount += cartItem.getQuantity()*cartItem.getProduct().getSellingPrice();
+            savings += cartItem.getQuantity()*cartItem.getProduct().getSavings();
         }
         return new Bill(totalAmount,savings);
 
@@ -219,7 +221,7 @@ public class CartActivity extends AppCompatActivity {
         // (but fully transparent) during the animation.
         //Calcualte the total bill
         Bill bill = createBill();
-        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.getAmountPaid());
+        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.calTotalAMountPaid());
         ((TextView)paymentView.findViewById(R.id.savingLabel)).setText(""+bill.getSavings());
         paymentView.setAlpha(0f);
         paymentView.setVisibility(View.VISIBLE);
