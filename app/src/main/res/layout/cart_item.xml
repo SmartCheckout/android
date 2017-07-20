@@ -30,7 +30,6 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintLeft_toRightOf="@+id/productImg"
             app:layout_constraintTop_toTopOf="@+id/productImg"
@@ -40,7 +39,6 @@
             android:id="@+id/productDesc"
             style="@style/smallTextFixedLen"
             android:layout_marginTop="8dp"
-            android:text=""
             app:layout_constraintLeft_toLeftOf="@+id/productTitle"
             app:layout_constraintTop_toBottomOf="@+id/productTitle"
             tools:text="Short Desciption of the product" />
@@ -50,16 +48,14 @@
             android:id="@+id/sellingPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="15dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:gravity="center"
-            android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat"
-            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/productImg"
+            app:layout_constraintBottom_toBottomOf="@+id/productImg"
             tools:text="$25"
-            app:layout_constraintVertical_bias="0.471" />
+             />
 
         <View
             android:layout_width="0dp"
@@ -93,13 +89,10 @@
             android:layout_height="wrap_content"
             android:scaleX=".75"
             android:scaleY="0.75"
-            android:layout_marginEnd="0dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintTop_toTopOf="@+id/sellingPrice"
-            android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="@+id/sellingPrice"
-            android:layout_marginBottom="0dp"
             app:layout_constraintRight_toLeftOf="@+id/sellingPrice"
-            android:layout_marginRight="16dp"
             app:layout_constraintVertical_bias="0.0"
             />
 

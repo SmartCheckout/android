@@ -48,6 +48,7 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("Creating Cart activity");
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
         Bundle inputBundle = initiatingIntent.getExtras();
@@ -63,6 +64,15 @@ public class CartActivity extends AppCompatActivity {
 
             //Intitially hide the payment view
             paymentView.setVisibility(View.GONE);
+
+            //Close payment view when user clicks back on the main cart screen
+            transactionView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    closePayment();
+
+                }
+            });
 
             //Display the address of the store
             ((TextView)findViewById(R.id.storeDetails)).setText(storeDisplay);
@@ -156,13 +166,13 @@ public class CartActivity extends AppCompatActivity {
                 try {
                     // Unique product found
 
-                        System.out.println("Product unique id -->"+response.getString("uniqueId"));
+                        /*System.out.println("Product unique id -->"+response.getString("uniqueId"));
                         System.out.println("Product barcode -->"+response.getString("barcode"));
                         System.out.println("Product title -->"+response.getString("title"));
                         System.out.println("Product description -->"+response.getString("description"));
                         System.out.println("Product category -->"+response.getString("category"));
                         System.out.println("Product retailPrice -->"+response.getDouble("retailPrice"));
-                        System.out.println("Product retailPrice -->"+response.getDouble("discount"));
+                        System.out.println("Product retailPrice -->"+response.getDouble("discount"));*/
                         Product product = new Product(response.getString("uniqueId"),
                                 response.getString("barcode"),
                                 response.getString("title"),
@@ -194,9 +204,14 @@ public class CartActivity extends AppCompatActivity {
         List<CartItem> cartList  = cartAdapter.getCartItemList();
         float totalAmount=0,savings=0;
         for (CartItem cartItem : cartList) {
-            totalAmount += cartItem.getQuantity()*cartItem.getProduct().getRetailPrice();
-            savings += cartItem.getProduct().getSavings();
+            System.out.println("cart item price -->"+cartItem.getProduct().getSellingPrice());
+            System.out.println("cart item quantity -->"+cartItem.getQuantity());
+            System.out.println("cart item savings -->"+cartItem.getProduct().getSavings());
+            totalAmount += (cartItem.getQuantity()*cartItem.getProduct().getSellingPrice());
+            savings += (cartItem.getQuantity()*cartItem.getProduct().getSavings());
         }
+        System.out.println("Total amount -->"+totalAmount);
+        System.out.println("cart item quantity -->"+savings);
         return new Bill(totalAmount,savings);
 
     }
@@ -218,8 +233,8 @@ public class CartActivity extends AppCompatActivity {
         // (but fully transparent) during the animation.
         //Calcualte the total bill
         Bill bill = createBill();
-        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.getAmountPaid());
-        ((TextView)paymentView.findViewById(R.id.savingLabel)).setText(""+bill.getSavings());
+        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.calTotalAMountPaid());
+        ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
         paymentView.setAlpha(0f);
         paymentView.setVisibility(View.VISIBLE);
 
@@ -229,6 +244,10 @@ public class CartActivity extends AppCompatActivity {
                 .alpha(1f)
                 .setDuration(mShortAnimationDuration)
                 .setListener(null);
+    }
+
+    public void closePayment() {
+        paymentView.setVisibility(View.GONE);
     }
 
 }
