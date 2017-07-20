@@ -349,14 +349,14 @@ public class StoreSelectionActivity extends Activity implements
         ((TextView)findViewById(R.id.noLocMessage)).setText(message);
         //Set listener for the on store listener
         Button scanQRStore = (Button) findViewById(R.id.scanQrStore);
-        scanQRStore.setOnClickListener(new View.OnClickListener() {
+        //Need to add code to find locaiton from the QR code from the service
+        /*scanQRStore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 launchScanBarcode(RC_SCAN_BARCODE_STORE);
 
-
             }
-        });
+        });*/
 
         Button findLocation = (Button) findViewById(R.id.findLocation);
         findLocation.setOnClickListener(new View.OnClickListener() {

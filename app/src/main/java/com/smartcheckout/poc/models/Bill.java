@@ -57,8 +57,9 @@ public class Bill {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.tax = this.sumSellPrice*(1-taxRate);
-
+        System.out.println("Tax rate -->"+ taxRate);
+        this.tax = this.sumSellPrice*taxRate;
+        System.out.println("Tax-->"+tax);
     }
 
     public float calTotalAMountPaid() {

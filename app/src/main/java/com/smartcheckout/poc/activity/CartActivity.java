@@ -65,6 +65,15 @@ public class CartActivity extends AppCompatActivity {
             //Intitially hide the payment view
             paymentView.setVisibility(View.GONE);
 
+            //Close payment view when user clicks back on the main cart screen
+            transactionView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    closePayment();
+
+                }
+            });
+
             //Display the address of the store
             ((TextView)findViewById(R.id.storeDetails)).setText(storeDisplay);
             CartListViewAdapter cartListViewAdapter = new CartListViewAdapter(this);
@@ -197,9 +206,12 @@ public class CartActivity extends AppCompatActivity {
         for (CartItem cartItem : cartList) {
             System.out.println("cart item price -->"+cartItem.getProduct().getSellingPrice());
             System.out.println("cart item quantity -->"+cartItem.getQuantity());
-            totalAmount += cartItem.getQuantity()*cartItem.getProduct().getSellingPrice();
-            savings += cartItem.getQuantity()*cartItem.getProduct().getSavings();
+            System.out.println("cart item savings -->"+cartItem.getProduct().getSavings());
+            totalAmount += (cartItem.getQuantity()*cartItem.getProduct().getSellingPrice());
+            savings += (cartItem.getQuantity()*cartItem.getProduct().getSavings());
         }
+        System.out.println("Total amount -->"+totalAmount);
+        System.out.println("cart item quantity -->"+savings);
         return new Bill(totalAmount,savings);
 
     }
@@ -222,7 +234,7 @@ public class CartActivity extends AppCompatActivity {
         //Calcualte the total bill
         Bill bill = createBill();
         ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.calTotalAMountPaid());
-        ((TextView)paymentView.findViewById(R.id.savingLabel)).setText(""+bill.getSavings());
+        ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
         paymentView.setAlpha(0f);
         paymentView.setVisibility(View.VISIBLE);
 
@@ -232,6 +244,10 @@ public class CartActivity extends AppCompatActivity {
                 .alpha(1f)
                 .setDuration(mShortAnimationDuration)
                 .setListener(null);
+    }
+
+    public void closePayment() {
+        paymentView.setVisibility(View.GONE);
     }
 
 }
