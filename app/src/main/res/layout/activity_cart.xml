@@ -51,6 +51,7 @@
             app:backgroundTint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="16dp"
             tools:layout_editor_absoluteX="344dp" />
 
         <android.support.design.widget.FloatingActionButton
@@ -63,6 +64,7 @@
             app:backgroundTint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
             tools:layout_editor_absoluteX="0dp" />
 
 
@@ -111,7 +113,7 @@
             tools:text="45"
             app:layout_constraintTop_toTopOf="@+id/dollarSymbol1"
             app:layout_constraintBottom_toBottomOf="@+id/dollarSymbol1"
-            app:layout_constraintLeft_toRightOf="@+id/dollarSymbol1" />
+            app:layout_constraintStart_toEndOf="@+id/dollarSymbol1" />
 
         <TextView
             android:id="@+id/totalLabel"
@@ -189,18 +191,16 @@
 
         <Button
             android:id="@+id/payButton"
-            android:layout_width="368dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Payment"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@+id/savingLabel"
             app:layout_constraintHorizontal_bias="0.0"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
 
         <TextView
             android:id="@+id/details"
@@ -212,9 +212,8 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Notification.Info"
             app:layout_constraintBottom_toBottomOf="@+id/totalAmount"
             app:layout_constraintTop_toTopOf="@+id/totalAmount"
-            app:layout_constraintLeft_toRightOf="@+id/totalAmount"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp" />
+            app:layout_constraintStart_toEndOf="@+id/totalAmount"
+            android:layout_marginStart="8dp" />
 
     </android.support.constraint.ConstraintLayout>
     <include

@@ -186,8 +186,10 @@ public class CartActivity extends AppCompatActivity {
                         System.out.println("Created product");
                         //progressBar.setVisibility(View.GONE);
                         // Add the product to the Cart
-                        CartItem cartItem = new CartItem(product,1,"");
+                        CartItem cartItem = new CartItem(product,1);
+                        System.out.println("Created cart item");
                         cartAdapter.addItem(cartItem);
+                        System.out.println("Added cart item to adapter");
 
                 } catch (JSONException je) {
                     je.printStackTrace();
