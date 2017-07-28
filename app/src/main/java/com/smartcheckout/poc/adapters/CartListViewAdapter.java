@@ -9,6 +9,10 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.CartItem;
 
@@ -16,6 +20,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by yeshwanth on 4/4/2017.
@@ -107,7 +113,18 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.productImg = (ImageView) view.findViewById(R.id.productImg);
             viewHolder.productTitle = (TextView) view.findViewById(R.id.productTitle);
             viewHolder.productDesc = (TextView) view.findViewById(R.id.productDesc);
+            //Set attributes for quantity here so that they are also cached by viewHolder
             viewHolder.quantity = (NumberPicker) view.findViewById(R.id.quantity);
+            viewHolder.quantity.setMinValue(1);
+            viewHolder.quantity.setMaxValue(25);
+            viewHolder.quantity.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                @Override
+                public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
+                    item.setQuantity(newVal);
+                    notifyDataSetChanged();
+
+                }
+            });
             viewHolder.sellingPrice = (TextView) view.findViewById(R.id.sellingPrice);
             // Cache the viewHolder object inside the fresh view
             view.setTag(viewHolder);
@@ -123,17 +140,9 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.productTitle.setText(item.getProduct().getTitle());
             viewHolder.productDesc.setText(item.getProduct().getDescription());
             viewHolder.sellingPrice.setText(df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
-            viewHolder.quantity.setMinValue(1);
-            viewHolder.quantity.setMaxValue(25);
             viewHolder.quantity.setValue(item.getQuantity());
-            viewHolder.quantity.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
-                    item.setQuantity(newVal);
-                    notifyDataSetChanged();
-
-                }
-            });
+            System.out.println("Product image url -->"+item.getProduct().getImagePath());
+            loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
 
             // Check with Yesh whether savings need to be shown at item level
             /*if(savings >0){
@@ -152,5 +161,14 @@ public class CartListViewAdapter extends BaseAdapter {
 
     public List<CartItem> getCartItemList() {
         return cartItemList;
+    }
+
+    //Load product image from firebase using glide for caching
+    public void loadProductImage(String url, ImageView prodImageView) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference imageReference = storage.getReferenceFromUrl(url);
+        // Load the image using Glide and Firebase UI as the model
+        Glide.with(getApplicationContext()).using(new FirebaseImageLoader()).load(imageReference).into(prodImageView);
+
     }
 }

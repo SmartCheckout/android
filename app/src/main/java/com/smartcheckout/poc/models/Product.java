@@ -9,8 +9,9 @@ public class Product{
 	private String category;
 	private Double retailPrice;
 	private Float discount;
+    private String imagePath;
 
-	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount) {
+	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount, String imagePath) {
 		this.uniqueId = uniqueId;
 		this.barcode = barcode;
 		this.title = title;
@@ -18,6 +19,7 @@ public class Product{
 		this.category = category;
 		this.retailPrice = retailPrice;
 		this.discount = discount;
+		this.imagePath=imagePath;
 	}
 
 	public String getUniqueId() {
@@ -83,4 +85,12 @@ public class Product{
 	public Double getSavings(){
 		return retailPrice - getSellingPrice();
 	}
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
 }

@@ -173,13 +173,16 @@ public class CartActivity extends AppCompatActivity {
                         System.out.println("Product category -->"+response.getString("category"));
                         System.out.println("Product retailPrice -->"+response.getDouble("retailPrice"));
                         System.out.println("Product retailPrice -->"+response.getDouble("discount"));*/
+
+                        //Hardcoding image url for testing....need to change it to load dynamically
+                        String imagePath = "https://firebasestorage.googleapis.com/v0/b/smartcheckout-2846e.appspot.com/o/product_icons%2Fitem1.jpg?alt=media&token=97ac4b89-bfef-4ace-a3aa-fbe641f0f9b0";
                         Product product = new Product(response.getString("uniqueId"),
                                 response.getString("barcode"),
                                 response.getString("title"),
                                 response.getString("description"),
                                 response.getString("category"),
                                 response.getDouble("retailPrice"),
-                                Float.valueOf(response.getString("discount")));
+                                Float.valueOf(response.getString("discount")),imagePath);
                         System.out.println("Created product");
                         //progressBar.setVisibility(View.GONE);
                         // Add the product to the Cart
@@ -216,12 +219,10 @@ public class CartActivity extends AppCompatActivity {
 
     }
     public void launchBarcodeScanner(){
-
+        System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
         /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
-
-        System.out.println("In launchBarcodeScanner");
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
         handleBarcode("5790");
