@@ -1,5 +1,11 @@
 package com.smartcheckout.poc.models;
 
+import com.smartcheckout.poc.util.PropertiesUtil;
+
+import java.io.IOException;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
+
 public class Product{
 
 	private String uniqueId;
@@ -11,7 +17,7 @@ public class Product{
 	private Float discount;
     private String imagePath;
 
-	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount, String imagePath) {
+	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount) {
 		this.uniqueId = uniqueId;
 		this.barcode = barcode;
 		this.title = title;
@@ -19,7 +25,11 @@ public class Product{
 		this.category = category;
 		this.retailPrice = retailPrice;
 		this.discount = discount;
-		this.imagePath=imagePath;
+		try {
+			this.imagePath= PropertiesUtil.getProperty("productURL",getApplicationContext()).concat(""+barcode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getUniqueId() {
@@ -90,7 +100,4 @@ public class Product{
         return imagePath;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
 }
