@@ -252,11 +252,16 @@ public class StoreSelectionActivity extends Activity implements
                     if (response.length() == 1) {
                         selectedStore = new Store();
                         JSONObject store = response.getJSONObject(0);
-                        System.out.println("Display address -->" + store.getString("displayAddress"));
+
                         System.out.println("Store ID -->" + store.getString("id"));
+                        System.out.println("Store title -->" + store.getString("title"));
+                        System.out.println("Display address -->" + store.getString("displayAddress"));
+
                         System.out.println("Setting display address and store Id");
-                        selectedStore.setDisplayAddress(store.getString("displayAddress"));
                         selectedStore.setId(store.getString("id"));
+                        selectedStore.setTitle(store.getString("title"));
+                        selectedStore.setDisplayAddress(store.getString("displayAddress"));
+
                         System.out.println("Before launching cart activity");
                         launchCartActivity();
                     }
