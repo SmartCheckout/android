@@ -18,8 +18,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4"
-        android:text="@string/no_loc_message" />
+        app:layout_constraintVertical_bias="0.38"
+        android:text="@string/no_loc_message"
+        tools:layout_editor_absoluteX="16dp" />
 
     <ProgressBar
         android:id="@+id/progressBarStoreScan"
@@ -33,24 +34,12 @@
         android:layout_marginTop="16dp"/>
 
     <Button
-        android:id="@+id/findLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/find_location_button"
-        app:layout_constraintStart_toStartOf="@+id/noLocMessage"
-        app:layout_constraintTop_toBottomOf="@+id/progressBarStoreScan"
-        />
-
-    <Button
         android:id="@+id/scanQrStore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="0dp"
         android:text="@string/scan_store_qr_button"
         app:layout_constraintEnd_toEndOf="@+id/noLocMessage"
-        app:layout_constraintTop_toTopOf="@+id/findLocation"
-        />
+        tools:layout_editor_absoluteY="247dp"
+        tools:layout_editor_absoluteX="111dp" />
 </android.support.constraint.ConstraintLayout>
