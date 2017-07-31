@@ -251,11 +251,13 @@ public class StoreSelectionActivity extends Activity implements
                               if (response.length() == 1) {
                                   selectedStore = new Store();
                                   JSONObject store = response.getJSONObject(0);
-                                  System.out.println("Display address -->"+store.getString("displayAddress"));
                                   System.out.println("Store ID -->"+store.getString("id"));
-                                  System.out.println("Setting display address and store Id");
-                                  selectedStore.setDisplayAddress(store.getString("displayAddress"));
+                                  System.out.println("Store title -->"+store.getString("title"));
+                                  System.out.println("Display address -->"+store.getString("displayAddress"));
+                                  System.out.println("Setting store details");
                                   selectedStore.setId(store.getString("id"));
+                                  selectedStore.setTitle(store.getString("title"));
+                                  selectedStore.setDisplayAddress(store.getString("displayAddress"));
                                   System.out.println("Before launching cart activity");
                                   launchCartActivity();
                               }
@@ -326,8 +328,10 @@ public class StoreSelectionActivity extends Activity implements
         if(selectedStore!=null){
             System.out.println("Launching cart activity");
             Intent cartActivityIntent = new Intent(this,CartActivity.class);
-            cartActivityIntent.putExtra("StoreDisplay", selectedStore.getDisplayAddress());
             cartActivityIntent.putExtra("StoreId",selectedStore.getId());
+            cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
+            cartActivityIntent.putExtra("StoreDisplayAddress", selectedStore.getDisplayAddress());
+
             startActivity(cartActivityIntent);
         }
 

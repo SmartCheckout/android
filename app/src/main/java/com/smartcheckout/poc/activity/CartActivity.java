@@ -30,9 +30,12 @@ public class CartActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private ListView cartListView;
-
+    //Store details
     private String storeId;
-    private String storeDisplay;
+    private String storeTitle;
+    private String storeDisplayAddress;
+
+
     private static final int RC_SCAN_BARCODE = 0;
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private CartListViewAdapter cartAdapter;
@@ -52,9 +55,10 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
         Bundle inputBundle = initiatingIntent.getExtras();
-        if(inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplay")){
+        if(inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplayAddress") && inputBundle.containsKey("StoreTitle")){
             storeId = inputBundle.getString("StoreId");
-            storeDisplay = inputBundle.getString("StoreDisplay");
+            storeTitle = inputBundle.getString("StoreTitle");
+            storeDisplayAddress = inputBundle.getString("StoreDisplayAddress");
 
             //Set the cart layout & hide the payment view
             setContentView(R.layout.activity_cart);
@@ -74,13 +78,15 @@ public class CartActivity extends AppCompatActivity {
                 }
             });
 
-            //Display the address of the store
-            ((TextView)findViewById(R.id.storeDetails)).setText(storeDisplay);
-            CartListViewAdapter cartListViewAdapter = new CartListViewAdapter(this);
+            //Display details of the store
+            System.out.println("CartActivity --> Store title -->"+storeTitle);
+            ((TextView)findViewById(R.id.storeTitle)).setText(storeTitle);
+            ((TextView)findViewById(R.id.storeAddress)).setText(storeDisplayAddress);
 
             //Link the cartList and the adapter
+            cartAdapter = new CartListViewAdapter(this);
             cartListView = (ListView)findViewById(R.id.cartList);
-            cartListView.setAdapter(cartListViewAdapter);
+            cartListView.setAdapter(cartAdapter);
 
 
 
@@ -107,7 +113,7 @@ public class CartActivity extends AppCompatActivity {
 
 
             // Set the bottom navigation view
-            bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
+            //bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
             /*bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -130,7 +136,7 @@ public class CartActivity extends AppCompatActivity {
         }else{
             startActivity(new Intent(this,StoreSelectionActivity.class));
         }
-        cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
+        //cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
 
     }
 
