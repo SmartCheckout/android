@@ -45,7 +45,7 @@ public class CartActivity extends AppCompatActivity {
     private View paymentView;
     private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
-
+    private int emulatorCounter=0;
 
 
     @Override
@@ -227,13 +227,19 @@ public class CartActivity extends AppCompatActivity {
 
     }
     public void launchBarcodeScanner(){
+        emulatorCounter++;
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
        /* Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
-        handleBarcode("5790");
+        if((emulatorCounter%3) == 0)
+            handleBarcode("5790");
+        else if((emulatorCounter%3) == 1)
+            handleBarcode("022000005120");
+        else
+            handleBarcode("02289902");
     }
 
     public void launchPayment() {
