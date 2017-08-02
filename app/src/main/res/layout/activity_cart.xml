@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/transactionContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight = "1.0"
         android:visibility="visible"
         tools:context="com.smartcheckout.poc.activity.CartActivity">
 
@@ -245,11 +247,13 @@
             tools:layout_editor_absoluteX="0dp" />
 
     </android.support.constraint.ConstraintLayout>
-    <include
+    <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation"
-        layout="@layout/bottom_navigation"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom" />
+        android:layout_gravity="bottom"
+        app:itemBackground="@color/colorPrimaryDark"
+        app:itemIconTint="@color/bottomNavigationIc"
+        app:menu="@menu/navigation" />
 
-</FrameLayout>
+</LinearLayout>
