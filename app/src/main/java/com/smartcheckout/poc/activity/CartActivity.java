@@ -30,9 +30,12 @@ public class CartActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private ListView cartListView;
-
+    //Store details
     private String storeId;
-    private String storeDisplay;
+    private String storeTitle;
+    private String storeDisplayAddress;
+
+
     private static final int RC_SCAN_BARCODE = 0;
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private CartListViewAdapter cartAdapter;
@@ -42,7 +45,7 @@ public class CartActivity extends AppCompatActivity {
     private View paymentView;
     private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
-
+    private int emulatorCounter=0;
 
 
     @Override
@@ -52,9 +55,10 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
         Bundle inputBundle = initiatingIntent.getExtras();
-        if(inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplay")){
+        if(inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplayAddress") && inputBundle.containsKey("StoreTitle")){
             storeId = inputBundle.getString("StoreId");
-            storeDisplay = inputBundle.getString("StoreDisplay");
+            storeTitle = inputBundle.getString("StoreTitle");
+            storeDisplayAddress = inputBundle.getString("StoreDisplayAddress");
 
             //Set the cart layout & hide the payment view
             setContentView(R.layout.activity_cart);
@@ -74,13 +78,15 @@ public class CartActivity extends AppCompatActivity {
                 }
             });
 
-            //Display the address of the store
-            ((TextView)findViewById(R.id.storeDetails)).setText(storeDisplay);
-            CartListViewAdapter cartListViewAdapter = new CartListViewAdapter(this);
+            //Display details of the store
+            System.out.println("CartActivity --> Store title -->"+storeTitle);
+            ((TextView)findViewById(R.id.storeTitle)).setText(storeTitle);
+            ((TextView)findViewById(R.id.storeAddress)).setText(storeDisplayAddress);
 
             //Link the cartList and the adapter
+            cartAdapter = new CartListViewAdapter(this);
             cartListView = (ListView)findViewById(R.id.cartList);
-            cartListView.setAdapter(cartListViewAdapter);
+            cartListView.setAdapter(cartAdapter);
 
 
 
@@ -107,8 +113,8 @@ public class CartActivity extends AppCompatActivity {
 
 
             // Set the bottom navigation view
-            /*bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
-            bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            //bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
+            /*bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     switch (item.getItemId()) {
@@ -130,7 +136,7 @@ public class CartActivity extends AppCompatActivity {
         }else{
             startActivity(new Intent(this,StoreSelectionActivity.class));
         }
-        cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
+        //cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
 
     }
 
@@ -175,19 +181,21 @@ public class CartActivity extends AppCompatActivity {
                         System.out.println("Product retailPrice -->"+response.getDouble("discount"));*/
 
                         //Hardcoding image url for testing....need to change it to load dynamically
-                        String imagePath = "https://firebasestorage.googleapis.com/v0/b/smartcheckout-2846e.appspot.com/o/product_icons%2Fitem1.jpg?alt=media&token=97ac4b89-bfef-4ace-a3aa-fbe641f0f9b0";
+                        //String imagePath = "gs://smartcheckout-2846e.appspot.com/product_icons/item1.jpg";
                         Product product = new Product(response.getString("uniqueId"),
                                 response.getString("barcode"),
                                 response.getString("title"),
                                 response.getString("description"),
                                 response.getString("category"),
                                 response.getDouble("retailPrice"),
-                                Float.valueOf(response.getString("discount")),imagePath);
+                                Float.valueOf(response.getString("discount")));
                         System.out.println("Created product");
                         //progressBar.setVisibility(View.GONE);
                         // Add the product to the Cart
-                        CartItem cartItem = new CartItem(product,1,"");
+                        CartItem cartItem = new CartItem(product,1);
+                        System.out.println("Created cart item");
                         cartAdapter.addItem(cartItem);
+                        System.out.println("Added cart item to adapter");
 
                 } catch (JSONException je) {
                     je.printStackTrace();
@@ -219,13 +227,19 @@ public class CartActivity extends AppCompatActivity {
 
     }
     public void launchBarcodeScanner(){
+        emulatorCounter++;
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
-        /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
+       /* Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
-        handleBarcode("5790");
+        if((emulatorCounter%3) == 0)
+            handleBarcode("5790");
+        else if((emulatorCounter%3) == 1)
+            handleBarcode("022000005120");
+        else
+            handleBarcode("02289902");
     }
 
     public void launchPayment() {
