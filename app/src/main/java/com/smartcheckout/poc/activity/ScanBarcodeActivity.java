@@ -1,11 +1,15 @@
 package com.smartcheckout.poc.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatCallback;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
@@ -19,38 +23,31 @@ import com.smartcheckout.poc.R;
 
 import java.io.IOException;
 
-public class ScanBarcodeActivity extends AppCompatActivity {
+public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
+    private SurfaceView cameraView = null;
+    private BarcodeDetector barcodeDetector = null;
+    private CameraSource cameraSource = null;
+    private final static int RC_CAM_PERMISSION = 1;
+    private static String TAG = "ScanBarcodeActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scan_main);
 
-
-        final SurfaceView cameraView = (SurfaceView) findViewById(R.id.camera_view);
-
-        BarcodeDetector barcodeDetector =
-                new BarcodeDetector.Builder(this)
-                        .build();
-
-        final CameraSource cameraSource = new CameraSource.Builder(this, barcodeDetector)
-                .setAutoFocusEnabled(true).build();
-
+        this.cameraView = (SurfaceView) findViewById(R.id.camera_view);
+        this.barcodeDetector = new BarcodeDetector.Builder(this).build();
+        this.cameraSource = new CameraSource.Builder(this, barcodeDetector).setAutoFocusEnabled(true).build();
         cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
-                    // cameraView.setRotation(Surface.ROTATION_90);
                     if (ActivityCompat.checkSelfPermission(ScanBarcodeActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        return;
+                        String[] requiredPermission = {Manifest.permission.CAMERA};
+                        ActivityCompat.requestPermissions(ScanBarcodeActivity.this, requiredPermission, RC_CAM_PERMISSION);
+                    }else{
+                        cameraSource.start(cameraView.getHolder());
                     }
-                    cameraSource.start(cameraView.getHolder());
                 } catch (IOException ie) {
                     Log.e("CAMERA SOURCE", ie.getMessage());
                 }
@@ -82,6 +79,25 @@ public class ScanBarcodeActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case RC_CAM_PERMISSION:
+                if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    try{
+                        cameraSource.start(cameraView.getHolder());
+                    }catch(SecurityException se){
+                        Log.e(TAG,se.getMessage());
+                    }catch(IOException io){
+                        Log.e(TAG,io.getMessage());
+                    }
+                }
+                else  {
+                    Log.d("ScanBarcodeActivity","Permission denied");
+                }
+        }
     }
 
     public void goToMainactivity(Barcode barcode)
