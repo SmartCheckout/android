@@ -217,11 +217,11 @@ public class CartActivity extends AppCompatActivity {
         emulatorCounter++;
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
-       /* Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
-        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
+        Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
+        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
-        populateDummyScanProd();
+        //populateDummyScanProd();
     }
 
     public void launchPayment() {
