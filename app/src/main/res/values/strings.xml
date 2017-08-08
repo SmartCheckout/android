@@ -60,6 +60,7 @@
     <string name="no_loc_message">Scan QR code of the store to start shopping</string>
     <string name="no_connection_message">There was a connection failure and we could not find which store you are at. Please allow us to try once more or scan the store\'s QR code </string>
     <string name="find_location_button">Find Location</string>
+    <string name="settings">Settings</string>
     <string-array name="payment_method">
         <item>MasterCard **** 2200</item>
         <item>PaytM ****1180</item>

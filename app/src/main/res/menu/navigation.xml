@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/navigation_search"
+        android:enabled="true"
         android:icon="@drawable/ic_search_black_24dp"
-        android:title="" />
+        android:title=""
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/navigation_cart"
+        android:enabled="true"
         android:icon="@drawable/ic_shopping_cart_black_24dp"
-        android:title="" />
+        android:title=""
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/navigation_accountSettings"
+        android:enabled="true"
         android:icon="@drawable/ic_settings_black_24dp"
-        android:title="" />
+        android:title=""
+        app:showAsAction="ifRoom"/>
 
 </menu>
