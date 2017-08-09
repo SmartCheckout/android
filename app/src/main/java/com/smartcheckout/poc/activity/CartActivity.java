@@ -6,6 +6,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,6 +35,7 @@ public class CartActivity extends AppCompatActivity {
     private String storeId;
     private String storeTitle;
     private String storeDisplayAddress;
+    private Bill bill = null;
 
 
     private static final int RC_SCAN_BARCODE = 0;
@@ -68,6 +70,12 @@ public class CartActivity extends AppCompatActivity {
 
             //Intitially hide the payment view
             paymentView.setVisibility(View.GONE);
+            findViewById(R.id.payButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    checkoutAndPay();
+                }
+            });
 
             //Close payment view when user clicks back on the main cart screen
             transactionView.setOnClickListener(new View.OnClickListener() {
@@ -247,7 +255,7 @@ public class CartActivity extends AppCompatActivity {
         // Set the content payment view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
         //Calcualte the total bill
-        Bill bill = createBill();
+        bill = createBill();
         ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.calTotalAMountPaid());
         ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
         paymentView.setAlpha(0f);
@@ -265,4 +273,14 @@ public class CartActivity extends AppCompatActivity {
         paymentView.setVisibility(View.GONE);
     }
 
+    public void checkoutAndPay(){
+        if(bill != null){
+            Intent paymentIntent = new Intent(this, PaymentActivity.class);
+            paymentIntent.putExtra("amount",bill.calTotalAMountPaid());
+            paymentIntent.putExtra("name", storeTitle);
+            paymentIntent.putExtra("currency","USD");
+            startActivity(paymentIntent);
+        }
+
+    }
 }
