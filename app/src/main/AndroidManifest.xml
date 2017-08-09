@@ -65,7 +65,7 @@
             android:value="AIzaSyBh0fC5aZv6UVcaV5bwneoBZmcoHe2VDrE" />
         <meta-data
             android:name="com.razorpay.ApiKey"
-            android:value="7iTqzTukLhb7ozzUIWCMpCR8" />
+            android:value="XXXXX" />
 
         <activity android:name=".activity.PaymentActivity"></activity>
     </application>
