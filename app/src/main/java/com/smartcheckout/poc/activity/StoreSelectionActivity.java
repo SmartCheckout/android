@@ -296,6 +296,7 @@ public class StoreSelectionActivity extends Activity implements
                 try{
                     selectedStore.setDisplayAddress(response.getString("displayAddress"));
                     selectedStore.setId(response.getString("id"));
+                    selectedStore.setTitle(response.getString("title"));
                     progressBar.setVisibility(View.GONE);
                     launchCartActivity();
                 }catch(JSONException je ){
