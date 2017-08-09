@@ -2,14 +2,19 @@ package com.smartcheckout.poc.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -47,7 +52,7 @@ public class CartActivity extends AppCompatActivity {
     private View paymentView;
     private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
-    private int emulatorCounter=0;
+    private int emulatorCounter = 0;
 
 
     @Override
@@ -57,7 +62,7 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
         Bundle inputBundle = initiatingIntent.getExtras();
-        if(inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplayAddress") && inputBundle.containsKey("StoreTitle")){
+        if (inputBundle.containsKey("StoreId") && inputBundle.containsKey("StoreDisplayAddress") && inputBundle.containsKey("StoreTitle")) {
             storeId = inputBundle.getString("StoreId");
             storeTitle = inputBundle.getString("StoreTitle");
             storeDisplayAddress = inputBundle.getString("StoreDisplayAddress");
@@ -87,16 +92,14 @@ public class CartActivity extends AppCompatActivity {
             });
 
             //Display details of the store
-            System.out.println("CartActivity --> Store title -->"+storeTitle);
-            ((TextView)findViewById(R.id.storeTitle)).setText(storeTitle);
-            ((TextView)findViewById(R.id.storeAddress)).setText(storeDisplayAddress);
+            System.out.println("CartActivity --> Store title -->" + storeTitle);
+            ((TextView) findViewById(R.id.storeTitle)).setText(storeTitle);
+            ((TextView) findViewById(R.id.storeAddress)).setText(storeDisplayAddress);
 
             //Link the cartList and the adapter
             cartAdapter = new CartListViewAdapter(this);
-            cartListView = (ListView)findViewById(R.id.cartList);
+            cartListView = (ListView) findViewById(R.id.cartList);
             cartListView.setAdapter(cartAdapter);
-
-
 
 
             //Initialize the scan button and its clickListener
@@ -114,35 +117,17 @@ public class CartActivity extends AppCompatActivity {
             fabCheckOut.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                   launchPayment();
+                    launchPayment();
 
                 }
             });
 
-
-            // Set the bottom navigation view
-            //bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
-            /*bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    switch (item.getItemId()) {
-                        case R.id.navigation_search:
-                            mTextMessage.setText(R.string.title_home);
-                            return true;
-                        case R.id.navigation_cart:
-                            mTextMessage.setText(R.string.title_dashboard);
-                            return true;
-                        case R.id.navigation_accountSettings:
-                            mTextMessage.setText(R.string.title_notifications);
-                            return true;
-                    }
-                    return false;
-                }
-            });*/
+            //Create the Bottom Navigation View
+            createBottomNavView();
 
 
-        }else{
-            startActivity(new Intent(this,StoreSelectionActivity.class));
+        } else {
+            startActivity(new Intent(this, StoreSelectionActivity.class));
         }
         //cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
 
@@ -151,18 +136,18 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Bundle bundle = data.getExtras();
-        switch(requestCode){
+        switch (requestCode) {
             case RC_SCAN_BARCODE:
-                if(bundle.containsKey("Barcode")){
+                if (bundle.containsKey("Barcode")) {
                     Barcode barcode = bundle.getParcelable("Barcode");
-                    System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : "+barcode.displayValue);
+                    System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
                     handleBarcode(barcode.displayValue);
                 }
                 break;
         }
     }
 
-    public void handleBarcode(String barcode){
+    public void handleBarcode(String barcode) {
         //Get Product Details
         String productSearchURL = getString(R.string.productSearchURL);
         RequestParams params = new RequestParams();
@@ -188,22 +173,22 @@ public class CartActivity extends AppCompatActivity {
                         System.out.println("Product retailPrice -->"+response.getDouble("retailPrice"));
                         System.out.println("Product retailPrice -->"+response.getDouble("discount"));*/
 
-                        //Hardcoding image url for testing....need to change it to load dynamically
-                        //String imagePath = "gs://smartcheckout-2846e.appspot.com/product_icons/item1.jpg";
-                        Product product = new Product(response.getString("uniqueId"),
-                                response.getString("barcode"),
-                                response.getString("title"),
-                                response.getString("description"),
-                                response.getString("category"),
-                                response.getDouble("retailPrice"),
-                                Float.valueOf(response.getString("discount")));
-                        System.out.println("Created product");
-                        //progressBar.setVisibility(View.GONE);
-                        // Add the product to the Cart
-                        CartItem cartItem = new CartItem(product,1);
-                        System.out.println("Created cart item");
-                        cartAdapter.addItem(cartItem);
-                        System.out.println("Added cart item to adapter");
+                    //Hardcoding image url for testing....need to change it to load dynamically
+                    //String imagePath = "gs://smartcheckout-2846e.appspot.com/product_icons/item1.jpg";
+                    Product product = new Product(response.getString("uniqueId"),
+                            response.getString("barcode"),
+                            response.getString("title"),
+                            response.getString("description"),
+                            response.getString("category"),
+                            response.getDouble("retailPrice"),
+                            Float.valueOf(response.getString("discount")));
+                    System.out.println("Created product");
+                    //progressBar.setVisibility(View.GONE);
+                    // Add the product to the Cart
+                    CartItem cartItem = new CartItem(product, 1);
+                    System.out.println("Created cart item");
+                    cartAdapter.addItem(cartItem);
+                    System.out.println("Added cart item to adapter");
 
                 } catch (JSONException je) {
                     je.printStackTrace();
@@ -220,21 +205,22 @@ public class CartActivity extends AppCompatActivity {
 
     public Bill createBill() {
 
-        List<CartItem> cartList  = cartAdapter.getCartItemList();
-        float totalAmount=0,savings=0;
+        List<CartItem> cartList = cartAdapter.getCartItemList();
+        float totalAmount = 0, savings = 0;
         for (CartItem cartItem : cartList) {
-            System.out.println("cart item price -->"+cartItem.getProduct().getSellingPrice());
-            System.out.println("cart item quantity -->"+cartItem.getQuantity());
-            System.out.println("cart item savings -->"+cartItem.getProduct().getSavings());
-            totalAmount += (cartItem.getQuantity()*cartItem.getProduct().getSellingPrice());
-            savings += (cartItem.getQuantity()*cartItem.getProduct().getSavings());
+            System.out.println("cart item price -->" + cartItem.getProduct().getSellingPrice());
+            System.out.println("cart item quantity -->" + cartItem.getQuantity());
+            System.out.println("cart item savings -->" + cartItem.getProduct().getSavings());
+            totalAmount += (cartItem.getQuantity() * cartItem.getProduct().getSellingPrice());
+            savings += (cartItem.getQuantity() * cartItem.getProduct().getSavings());
         }
-        System.out.println("Total amount -->"+totalAmount);
-        System.out.println("cart item quantity -->"+savings);
-        return new Bill(totalAmount,savings);
+        System.out.println("Total amount -->" + totalAmount);
+        System.out.println("cart item quantity -->" + savings);
+        return new Bill(totalAmount, savings);
 
     }
-    public void launchBarcodeScanner(){
+
+    public void launchBarcodeScanner() {
         emulatorCounter++;
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
@@ -242,12 +228,7 @@ public class CartActivity extends AppCompatActivity {
         startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
-        if((emulatorCounter%3) == 0)
-            handleBarcode("5790");
-        else if((emulatorCounter%3) == 1)
-            handleBarcode("022000005120");
-        else
-            handleBarcode("02289902");
+        populateDummyScanProd();
     }
 
     public void launchPayment() {
@@ -283,4 +264,58 @@ public class CartActivity extends AppCompatActivity {
         }
 
     }
+  
+    public void populateDummyScanProd() {
+
+        if ((emulatorCounter % 3) == 0)
+            handleBarcode("5790");
+        else if ((emulatorCounter % 3) == 1)
+            handleBarcode("022000005120");
+        else
+            handleBarcode("02289902");
+    }
+
+    public void createBottomNavView() {
+
+        // Set the bottom navigation view
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        //Set on click listener for the post sign out screen
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_search:
+                        return true;
+                    case R.id.navigation_cart:
+                        return true;
+                    case R.id.navigation_accountSettings:
+                        System.out.println("Bottom navigation --> Sign out case");
+                        setContentView(R.layout.settings);
+                        System.out.println("Settings layout set");
+                        //Set the on click listener for sign out
+                        Button signOutButton = (Button) findViewById(R.id.sign_out);
+                        signOutButton.setOnClickListener(
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        System.out.println("On click of sign out");
+                                        if (v.getId() == R.id.sign_out) {
+                                            AuthUI.getInstance()
+                                                    .signOut(CartActivity.this)
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            startActivity(new Intent(CartActivity.this, PostSignOut.class));
+                                                            finish();
+                                                        }
+                                                    });
+                                        }
+                                    }
+                                });
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+
 }

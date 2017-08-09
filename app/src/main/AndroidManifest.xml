@@ -68,6 +68,7 @@
             android:value="XXXXX" />
 
         <activity android:name=".activity.PaymentActivity"></activity>
+        <activity android:name=".activity.PostSignOut"></activity>
     </application>
 
 </manifest>
