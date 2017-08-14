@@ -289,28 +289,10 @@ public class CartActivity extends AppCompatActivity {
                     case R.id.navigation_cart:
                         return true;
                     case R.id.navigation_accountSettings:
-                        System.out.println("Bottom navigation --> Sign out case");
-                        setContentView(R.layout.settings);
-                        System.out.println("Settings layout set");
+                        System.out.println("Bottom navigation --> settings case");
+                        //setContentView(R.layout.settings);
+                        startActivity(new Intent(CartActivity.this, SettingsActivity.class));
                         //Set the on click listener for sign out
-                        Button signOutButton = (Button) findViewById(R.id.sign_out);
-                        signOutButton.setOnClickListener(
-                                new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        System.out.println("On click of sign out");
-                                        if (v.getId() == R.id.sign_out) {
-                                            AuthUI.getInstance()
-                                                    .signOut(CartActivity.this)
-                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            startActivity(new Intent(CartActivity.this, PostSignOut.class));
-                                                            finish();
-                                                        }
-                                                    });
-                                        }
-                                    }
-                                });
                         return true;
                 }
                 return false;
