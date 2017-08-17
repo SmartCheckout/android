@@ -50,6 +50,7 @@ public class CartActivity extends AppCompatActivity {
     private double totalSavings;
     private View transactionView;
     private View paymentView;
+    private View mainContainerView;
     private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
     private int emulatorCounter = 0;
@@ -71,6 +72,7 @@ public class CartActivity extends AppCompatActivity {
             setContentView(R.layout.activity_cart);
             transactionView = findViewById(R.id.transactionContainer);
             paymentView = findViewById(R.id.paymentContainer);
+            mainContainerView = findViewById(R.id.mainContainer);
             mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
             //Intitially hide the payment view
@@ -83,7 +85,7 @@ public class CartActivity extends AppCompatActivity {
             });
 
             //Close payment view when user clicks back on the main cart screen
-            transactionView.setOnClickListener(new View.OnClickListener() {
+            mainContainerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     closePayment();
