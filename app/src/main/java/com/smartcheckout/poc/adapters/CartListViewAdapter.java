@@ -39,6 +39,7 @@ public class CartListViewAdapter extends BaseAdapter {
         TextView productDesc;
         TextView sellingPrice;
         Spinner quantity;
+        ArrayAdapter<Integer> quantityAdapter;
     }
 
     private Context context;
@@ -125,10 +126,10 @@ public class CartListViewAdapter extends BaseAdapter {
 
             //Set attributes for quantity here so that they are also cached by viewHolder
             viewHolder.quantity = (Spinner) view.findViewById(R.id.quantity);
-            ArrayAdapter<Integer> quantityAdapter = new ArrayAdapter<Integer>(getApplicationContext(), R.layout.spinner_item, quantList);
+            viewHolder.quantityAdapter = new ArrayAdapter<Integer>(getApplicationContext(), R.layout.spinner_item, quantList);
             // Specify the layout to use when the list of choices appears
-            quantityAdapter.setDropDownViewResource(R.layout.spinner_drop_down);
-            viewHolder.quantity.setAdapter(quantityAdapter);
+            viewHolder.quantityAdapter.setDropDownViewResource(R.layout.spinner_drop_down);
+            viewHolder.quantity.setAdapter(viewHolder.quantityAdapter);
             viewHolder.sellingPrice = (TextView) view.findViewById(R.id.sellingPrice);
             // Cache the viewHolder object inside the fresh view
             view.setTag(viewHolder);
@@ -162,6 +163,8 @@ public class CartListViewAdapter extends BaseAdapter {
 
                 }
             });
+            //Set the item quantity in spinner
+            viewHolder.quantity.setSelection(viewHolder.quantityAdapter.getPosition(item.getQuantity()));
 
             System.out.println("Product image url -->"+item.getProduct().getImagePath());
             loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
@@ -193,4 +196,13 @@ public class CartListViewAdapter extends BaseAdapter {
         Glide.with(getApplicationContext()).using(new FirebaseImageLoader()).load(imageReference).into(prodImageView);
 
     }
+
+    //Removes the specified item
+    public void remove(CartItem cartItem) {
+        cartItemList.remove(cartItem);
+        itemTracker.remove(cartItem.getProduct().getBarcode());
+
+
+    }
+
 }
