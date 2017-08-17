@@ -21,6 +21,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
+import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
@@ -50,6 +51,7 @@ public class CartActivity extends AppCompatActivity {
     private double totalSavings;
     private View transactionView;
     private View paymentView;
+    private View mainContainerView;
     private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
     private int emulatorCounter = 0;
@@ -71,6 +73,7 @@ public class CartActivity extends AppCompatActivity {
             setContentView(R.layout.activity_cart);
             transactionView = findViewById(R.id.transactionContainer);
             paymentView = findViewById(R.id.paymentContainer);
+            mainContainerView = findViewById(R.id.mainContainer);
             mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
             //Intitially hide the payment view
@@ -83,7 +86,7 @@ public class CartActivity extends AppCompatActivity {
             });
 
             //Close payment view when user clicks back on the main cart screen
-            transactionView.setOnClickListener(new View.OnClickListener() {
+            mainContainerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     closePayment();
@@ -101,6 +104,8 @@ public class CartActivity extends AppCompatActivity {
             cartListView = (ListView) findViewById(R.id.cartList);
             cartListView.setAdapter(cartAdapter);
 
+            //Set swipe to delete functionlaity
+            setSwipeDelItem();
 
             //Initialize the scan button and its clickListener
             FloatingActionButton fabScan = (FloatingActionButton) findViewById(R.id.fabScan);
@@ -298,6 +303,35 @@ public class CartActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    public void setSwipeDelItem() {
+        // Create a ListView-specific touch listener. ListViews are given special treatment because
+        // by default they handle touches for their list items... i.e. they're in charge of drawing
+        // the pressed state (the list selector), handling list item clicks, etc.
+        SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(
+                        cartListView,
+                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                            @Override
+                            public boolean canDismiss(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismiss(ListView cartListView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    cartAdapter.remove((CartItem)cartAdapter.getItem(position));
+                                }
+                                cartAdapter.notifyDataSetChanged();
+                            }
+                        });
+        cartListView.setOnTouchListener(touchListener);
+        // Setting this scroll listener is required to ensure that during ListView scrolling,
+        // we don't look for swipes.
+        cartListView.setOnScrollListener(touchListener.makeScrollListener());
+
+
     }
 
 }

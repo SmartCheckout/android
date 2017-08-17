@@ -4,9 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -35,18 +38,18 @@ public class CartListViewAdapter extends BaseAdapter {
         TextView productTitle;
         TextView productDesc;
         TextView sellingPrice;
-        NumberPicker quantity;
+        Spinner quantity;
+        ArrayAdapter<Integer> quantityAdapter;
     }
 
     private Context context;
     private List<CartItem> cartItemList;
     private HashMap<String, CartItem> itemTracker;
+    private ArrayList<Integer> quantList;
 
     //Creates an adapter from an already defined list
     public CartListViewAdapter(Context context, List<CartItem> cartItemList) {
-        this.cartItemList = cartItemList;
-        this.context = context;
-        itemTracker = new HashMap<>();
+        this(context);
         for (CartItem item : cartItemList) {
             itemTracker.put(item.getProduct().getBarcode(), item);
         }
@@ -56,7 +59,11 @@ public class CartListViewAdapter extends BaseAdapter {
     public CartListViewAdapter(Context context) {
         this.context = context;
         this.cartItemList = new ArrayList<CartItem>();
-        itemTracker = new HashMap<>();
+        this.itemTracker = new HashMap<>();
+        this.quantList = new ArrayList<Integer>();
+        for (int i=1; i <= 5; i++) {
+            this.quantList.add(i);
+        }
     }
 
     public CartItem findItemInCart(CartItem cartItem) {
@@ -98,8 +105,11 @@ public class CartListViewAdapter extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder viewHolder;
 
+        System.out.println("-----In getView----");
+
         //Get the cart item for this position
         final CartItem item = (CartItem) getItem(position);
+        System.out.println("Item ----> "+item.getProduct().getTitle());
 
         if (item != null) {
 
@@ -113,18 +123,13 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.productImg = (ImageView) view.findViewById(R.id.productImg);
             viewHolder.productTitle = (TextView) view.findViewById(R.id.productTitle);
             viewHolder.productDesc = (TextView) view.findViewById(R.id.productDesc);
-            //Set attributes for quantity here so that they are also cached by viewHolder
-            viewHolder.quantity = (NumberPicker) view.findViewById(R.id.quantity);
-            viewHolder.quantity.setMinValue(1);
-            viewHolder.quantity.setMaxValue(25);
-            viewHolder.quantity.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
-                    item.setQuantity(newVal);
-                    notifyDataSetChanged();
 
-                }
-            });
+            //Set attributes for quantity here so that they are also cached by viewHolder
+            viewHolder.quantity = (Spinner) view.findViewById(R.id.quantity);
+            viewHolder.quantityAdapter = new ArrayAdapter<Integer>(getApplicationContext(), R.layout.spinner_item, quantList);
+            // Specify the layout to use when the list of choices appears
+            viewHolder.quantityAdapter.setDropDownViewResource(R.layout.spinner_drop_down);
+            viewHolder.quantity.setAdapter(viewHolder.quantityAdapter);
             viewHolder.sellingPrice = (TextView) view.findViewById(R.id.sellingPrice);
             // Cache the viewHolder object inside the fresh view
             view.setTag(viewHolder);
@@ -140,7 +145,27 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.productTitle.setText(item.getProduct().getTitle());
             viewHolder.productDesc.setText(item.getProduct().getDescription());
             viewHolder.sellingPrice.setText(df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
-            viewHolder.quantity.setValue(item.getQuantity());
+            //viewHolder.quantity.setValue(item.getQuantity());
+            //Add listener and update quantity
+            viewHolder.quantity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> spinnerParent, View spinnerView, int spinnerPosition, long id) {
+                    //System.out.println("-----In Spinner onItemSelected-----");
+                    //System.out.println("Item ----->" + item.getProduct().getTitle());
+                    //System.out.println("Spinner position ----->" + spinnerPosition);
+                    item.setQuantity((Integer)spinnerParent.getItemAtPosition(spinnerPosition));
+
+                    notifyDataSetChanged();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            //Set the item quantity in spinner
+            viewHolder.quantity.setSelection(viewHolder.quantityAdapter.getPosition(item.getQuantity()));
+
             System.out.println("Product image url -->"+item.getProduct().getImagePath());
             loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
 
@@ -171,4 +196,13 @@ public class CartListViewAdapter extends BaseAdapter {
         Glide.with(getApplicationContext()).using(new FirebaseImageLoader()).load(imageReference).into(prodImageView);
 
     }
+
+    //Removes the specified item
+    public void remove(CartItem cartItem) {
+        cartItemList.remove(cartItem);
+        itemTracker.remove(cartItem.getProduct().getBarcode());
+
+
+    }
+
 }
