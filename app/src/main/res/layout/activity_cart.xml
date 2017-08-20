@@ -64,7 +64,6 @@
             android:id="@+id/listContainer"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/storeDetails"
@@ -254,14 +253,6 @@
         android:layout_width="match_parent"
         android:layout_height="4dp"
         android:background="@drawable/shadow"/>
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:itemBackground="@color/colorPrimaryDark"
-        app:itemIconTint="@drawable/selector"
-        app:itemTextColor="@drawable/selector"
-        app:menu="@menu/navigation" />
+    <include layout="@layout/bottom_navigation"/>
 
 </LinearLayout>
