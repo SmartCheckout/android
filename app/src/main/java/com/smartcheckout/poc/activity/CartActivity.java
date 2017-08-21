@@ -6,32 +6,40 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.ResponseHandlerInterface;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
+import com.smartcheckout.poc.util.StateData;
+import com.smartcheckout.poc.util.Currency;
+import com.smartcheckout.poc.util.TransactionStatus;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.entity.ContentType;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class CartActivity extends AppCompatActivity {
 
@@ -55,6 +63,7 @@ public class CartActivity extends AppCompatActivity {
     private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
     private int emulatorCounter = 0;
+    private String TAG = "CartActivity";
 
 
     @Override
@@ -89,7 +98,7 @@ public class CartActivity extends AppCompatActivity {
             mainContainerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    closePayment();
+                    closePaymentView();
 
                 }
             });
@@ -122,7 +131,7 @@ public class CartActivity extends AppCompatActivity {
             fabCheckOut.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    launchPayment();
+                    launchBillView();
 
                 }
             });
@@ -208,21 +217,15 @@ public class CartActivity extends AppCompatActivity {
 
     }
 
-    public Bill createBill() {
-
-        List<CartItem> cartList = cartAdapter.getCartItemList();
-        float totalAmount = 0, savings = 0;
-        for (CartItem cartItem : cartList) {
-            System.out.println("cart item price -->" + cartItem.getProduct().getSellingPrice());
-            System.out.println("cart item quantity -->" + cartItem.getQuantity());
-            System.out.println("cart item savings -->" + cartItem.getProduct().getSavings());
-            totalAmount += (cartItem.getQuantity() * cartItem.getProduct().getSellingPrice());
-            savings += (cartItem.getQuantity() * cartItem.getProduct().getSavings());
+    public void calculateBill() {
+        if(this.bill == null){
+            this.bill = new Bill(cartAdapter.getTotalAmount(), cartAdapter.getTotalSavings(), 0, Currency.USD);
+            this.bill.notifyChanges();
+        }else {
+            this.bill.setSubTotal(cartAdapter.getTotalAmount());
+            this.bill.setSavings(cartAdapter.getTotalSavings());
+            this.bill.notifyChanges();
         }
-        System.out.println("Total amount -->" + totalAmount);
-        System.out.println("cart item quantity -->" + savings);
-        return new Bill(totalAmount, savings);
-
     }
 
     public void launchBarcodeScanner() {
@@ -236,13 +239,13 @@ public class CartActivity extends AppCompatActivity {
         populateDummyScanProd();
     }
 
-    public void launchPayment() {
+    public void launchBillView() {
 
         // Set the content payment view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
         //Calcualte the total bill
-        bill = createBill();
-        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.calTotalAMountPaid());
+        calculateBill();
+        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.getTotalAmount());
         ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
         paymentView.setAlpha(0f);
         paymentView.setVisibility(View.VISIBLE);
@@ -255,21 +258,78 @@ public class CartActivity extends AppCompatActivity {
                 .setListener(null);
     }
 
-    public void closePayment() {
+    public void closePaymentView() {
         paymentView.setVisibility(View.GONE);
     }
 
+    /*
+    * Triggered when the user clicks the pay button from bill view
+    * Prerequisite : bill is calculated.
+    * Actions : persists transaction into db and initiates payment activity
+    * */
     public void checkoutAndPay(){
         if(bill != null){
-            Intent paymentIntent = new Intent(this, PaymentActivity.class);
-            paymentIntent.putExtra("amount",bill.calTotalAMountPaid());
-            paymentIntent.putExtra("name", storeTitle);
-            paymentIntent.putExtra("currency","USD");
-            startActivity(paymentIntent);
+            // Persist transaction to
+            String createTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/create";
+            JSONObject createTrnsReq = new JSONObject();
+            StateData.billAmount = bill.getTotalAmount();
+            try{
+                String currentTS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
+                //Store object preparation
+                JSONObject store = new JSONObject();
+                store.put("id",StateData.storeId);
+
+                //Bill object preparation
+                JSONObject jBill = new JSONObject();
+                jBill.put("subTotal",bill.getSubTotal());
+                jBill.put("tax", bill.getTax());
+                jBill.put("currency", bill.getCurrency().toString());
+                jBill.put("total",bill.getTotalAmount());
+                jBill.put("savings",bill.getSavings());
+
+                createTrnsReq.put("trnsDate", currentTS );
+                createTrnsReq.put("status", TransactionStatus.CHECKOUT);
+                createTrnsReq.put("createTS", currentTS);
+                createTrnsReq.put("updateTS", currentTS);
+                createTrnsReq.put("store", store);
+                createTrnsReq.put("bill", jBill);
+
+            }catch(JSONException je){
+                je.printStackTrace();
+            }
+
+
+
+            StateData.status = TransactionStatus.CHECKOUT;
+            // Invoking create transaction
+            StringEntity requestEntity = new StringEntity(createTrnsReq.toString(), ContentType.APPLICATION_JSON);
+            Log.d(TAG,"Invoking create transaction. Request : "+ createTrnsReq.toString());
+            ahttpClient.post(this, createTrnsEP, requestEntity, "application/json" , new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                   try{
+                       //Setting transaction id into state data
+                       Log.d(TAG, "Create Transaction Successful");
+                       StateData.transactionId = response.getString("trnsId");
+                       Log.d(TAG, "Generated transaction id : "+  StateData.transactionId);
+
+                       Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
+                       startActivity(paymentIntent);
+                   }catch(Exception e){
+
+                   }
+
+                }
+
+            });
         }
 
     }
-  
+
+    public void persistTransactionData(){
+
+    }
+    
     public void populateDummyScanProd() {
 
         if ((emulatorCounter % 3) == 0)
