@@ -169,6 +169,7 @@ public class CartListViewAdapter extends BaseAdapter {
                     //System.out.println("-----In Spinner onItemSelected-----");
                     //System.out.println("Item ----->" + item.getProduct().getTitle());
                     //System.out.println("Spinner position ----->" + spinnerPosition);
+
                     int newQuantity = (Integer)spinnerParent.getItemAtPosition(spinnerPosition);
                     int qtyDifference = newQuantity - item.getQuantity();
                     totalAmount += qtyDifference* item.getProduct().getSellingPrice();
@@ -219,8 +220,7 @@ public class CartListViewAdapter extends BaseAdapter {
 
     //Removes the specified item
     public void remove(CartItem cartItem) {
-
-        // Updating the total amount and savings based on the item being removed
+      // Updating the total amount and savings based on the item being removed
         totalSavings -= cartItem.getQuantity()*cartItem.getProduct().getSavings();
         totalAmount -= cartItem.getQuantity()*cartItem.getProduct().getSellingPrice();
         cartItemList.remove(cartItem);

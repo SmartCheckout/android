@@ -51,6 +51,10 @@ public class CartActivity extends AppCompatActivity {
     private String storeDisplayAddress;
     private Bill bill = null;
 
+    //Floating action buttons
+    private FloatingActionButton fabScan;
+    private FloatingActionButton fabCheckOut;
+
 
     private static final int RC_SCAN_BARCODE = 0;
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
@@ -117,7 +121,7 @@ public class CartActivity extends AppCompatActivity {
             setSwipeDelItem();
 
             //Initialize the scan button and its clickListener
-            FloatingActionButton fabScan = (FloatingActionButton) findViewById(R.id.fabScan);
+            fabScan = (FloatingActionButton) findViewById(R.id.fabScan);
             fabScan.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -127,7 +131,7 @@ public class CartActivity extends AppCompatActivity {
             });
 
             //Intiiate the cart checkout floating action and listener
-            FloatingActionButton fabCheckOut = (FloatingActionButton) findViewById(R.id.fabCheckOut);
+            fabCheckOut = (FloatingActionButton) findViewById(R.id.fabCheckOut);
             fabCheckOut.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -241,12 +245,20 @@ public class CartActivity extends AppCompatActivity {
 
     public void launchBillView() {
 
+
         // Set the content payment view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
         //Calcualte the total bill
         calculateBill();
         ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.getTotalAmount());
         ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
+
+        //make the floating aciton buttons disappear
+        fabScan.setVisibility(View.GONE);
+        fabCheckOut.setVisibility(View.GONE);
+
+        // Set the content payment view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
         paymentView.setAlpha(0f);
         paymentView.setVisibility(View.VISIBLE);
 
@@ -260,6 +272,10 @@ public class CartActivity extends AppCompatActivity {
 
     public void closePaymentView() {
         paymentView.setVisibility(View.GONE);
+        //Make the floating action buttons visible
+        //make the floating aciton buttons disappear
+        fabScan.setVisibility(View.VISIBLE);
+        fabCheckOut.setVisibility(View.VISIBLE);
     }
 
     /*
