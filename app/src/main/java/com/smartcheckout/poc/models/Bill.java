@@ -1,11 +1,7 @@
 package com.smartcheckout.poc.models;
 
-import com.smartcheckout.poc.util.PropertiesUtil;
-
-import java.io.IOException;
 import java.math.BigDecimal;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
+import com.smartcheckout.poc.util.Currency;
 
 /**
  * Created by rahul on 7/3/2017.
@@ -13,66 +9,57 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class Bill {
 
-    private float sumSellPrice; // Total amount by adding MRP of all itens in the cart
+    private float subTotal; // Total amount by adding MRP of all itens in the cart
     private float savings;     // Total savings by calculating the disounts and offers
+    private float taxPercent;
     private float tax;       // T
-   private float totalAmountPaid; //Final amount to be paid
+    private Currency currency;
+    private float totalAmount; //Final amount to be paid
 
-    public Bill(float sumSellPrice, float savings) {
-        this.sumSellPrice = sumSellPrice;
+    public Bill(float subTotal, float savings, float taxPercent, Currency currency) {
+        this.subTotal = subTotal;
         this.savings = savings;
+        this.taxPercent = taxPercent;
+        this.currency = currency;
+        notifyChanges();
     }
 
-    /*public float getTotalAmount() {
-        return round(this.totalAmount,2);
+    public float getSubTotal() {
+        return round(this.subTotal, 2);
     }
 
-    public void setTotalAmount(float totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-*/
-    public float getSumSellPrice() {
-        return round(this.sumSellPrice,2);
-    }
-
-    public void setSumSellPrice(float sumSellPrice) {
-        this.sumSellPrice = sumSellPrice;
+    public void setSubTotal(float subTotal) {
+        this.subTotal = subTotal;
     }
 
     public float getSavings() {
-        return round(this.savings,2);
+        return round(this.savings, 2);
     }
 
     public void setSavings(float savings) {
         this.savings = savings;
     }
 
-
-
-    private void calTax() {
-
-        float taxRate = 0;
-        try {
-            taxRate = Float.parseFloat(PropertiesUtil.getProperty("taxRate",getApplicationContext()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Tax rate -->"+ taxRate);
-        this.tax = this.sumSellPrice*taxRate;
-        System.out.println("Tax-->"+tax);
+    public float getTax(){
+        return round(this.tax, 2);
     }
 
-    public float calTotalAMountPaid() {
-        calTax();
-        this.totalAmountPaid = this.sumSellPrice + this.tax;
-        return round(totalAmountPaid, 2);
-
+    public float getTotalAmount(){
+        return round(this.totalAmount, 2);
     }
 
+    public Currency getCurrency(){
+        return this.currency;
+    }
 
-
-
-
+    /*
+    * Recalculates the tax and total amount of the bill.
+    * Should be called by the client every time the subTotal amount or tax is changed.
+    * */
+    public void notifyChanges(){
+        this.tax = this.subTotal * this.taxPercent;
+        this.totalAmount =  this.subTotal + this.tax;
+    }
 
 
     private float round(float d, int decimalPlace) {
