@@ -15,6 +15,7 @@ import com.firebase.ui.auth.ResultCodes;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.smartcheckout.poc.R;
+import com.smartcheckout.poc.util.StateData;
 
 import java.util.Arrays;
 
@@ -97,6 +98,7 @@ public class LoginActivity extends AppCompatActivity {
             mAuth.addAuthStateListener(mAuthListener);
     }
     public void onSignInInitialize() {
+        /** TBD : Set the logged in user id to StateData **/
         Intent storeSelectionIntent = new Intent(this, StoreSelectionActivity.class);
         startActivity(storeSelectionIntent);
 

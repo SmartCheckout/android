@@ -66,4 +66,6 @@
         <item>PaytM ****1180</item>
         <item>Visa *****3204</item>
     </string-array>
+    <string name="title_activity_payment">PaymentActivity</string>
+    <string name="history">Transaction History</string>
 </resources>

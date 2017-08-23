@@ -33,6 +33,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.util.StateData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -263,6 +264,8 @@ public class StoreSelectionActivity extends Activity implements
                         selectedStore.setDisplayAddress(store.getString("displayAddress"));
 
                         System.out.println("Before launching cart activity");
+                        StateData.storeId = selectedStore.getId();
+                        StateData.storeName = selectedStore.getTitle();
                         launchCartActivity();
                     }
                 } catch (JSONException je) {
@@ -296,7 +299,10 @@ public class StoreSelectionActivity extends Activity implements
                 try{
                     selectedStore.setDisplayAddress(response.getString("displayAddress"));
                     selectedStore.setId(response.getString("id"));
+                    selectedStore.setTitle(response.getString("title"));
                     progressBar.setVisibility(View.GONE);
+                    StateData.storeId = selectedStore.getId();
+                    StateData.storeName = selectedStore.getTitle();
                     launchCartActivity();
                 }catch(JSONException je ){
                     je.printStackTrace();
