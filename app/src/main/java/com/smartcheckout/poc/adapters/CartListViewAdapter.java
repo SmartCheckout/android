@@ -46,6 +46,8 @@ public class CartListViewAdapter extends BaseAdapter {
     private List<CartItem> cartItemList;
     private HashMap<String, CartItem> itemTracker;
     private ArrayList<Integer> quantList;
+    private float totalAmount = 0;
+    private float totalSavings = 0;
 
     //Creates an adapter from an already defined list
     public CartListViewAdapter(Context context, List<CartItem> cartItemList) {
@@ -73,15 +75,29 @@ public class CartListViewAdapter extends BaseAdapter {
     public void addItem(CartItem cartItem) {
         CartItem iteminCart = findItemInCart(cartItem);
         if (iteminCart == null) {
+            // Item not in cart
             cartItemList.add(cartItem);
             itemTracker.put(cartItem.getProduct().getBarcode(), cartItem);
+
+            // Updating the total amount and total savings of the contents of the cart
+            totalAmount += cartItem.getQuantity() * cartItem.getProduct().getSellingPrice();
+            totalSavings += cartItem.getQuantity()* cartItem.getProduct().getSavings();
+
         } else {
+            // Item alreay in cart
+            // Updating the total amount and total savings of the contents of the cart based on the increase in quantity
             int currentQty = iteminCart.getQuantity();
-            iteminCart.setQuantity(currentQty + cartItem.getQuantity());
+            int qtyIncrease = cartItem.getQuantity();
+            iteminCart.setQuantity(currentQty + qtyIncrease);
+            totalAmount += qtyIncrease * cartItem.getProduct().getSellingPrice();
+            totalSavings += qtyIncrease* cartItem.getProduct().getSavings();
         }
 
         notifyDataSetChanged();
     }
+
+    public float getTotalAmount(){return totalAmount;}
+    public float getTotalSavings(){return totalSavings;}
 
     @Override
     public int getCount() {
@@ -153,8 +169,13 @@ public class CartListViewAdapter extends BaseAdapter {
                     //System.out.println("-----In Spinner onItemSelected-----");
                     //System.out.println("Item ----->" + item.getProduct().getTitle());
                     //System.out.println("Spinner position ----->" + spinnerPosition);
-                    item.setQuantity((Integer)spinnerParent.getItemAtPosition(spinnerPosition));
 
+                    int newQuantity = (Integer)spinnerParent.getItemAtPosition(spinnerPosition);
+                    int qtyDifference = newQuantity - item.getQuantity();
+                    totalAmount += qtyDifference* item.getProduct().getSellingPrice();
+                    totalSavings += qtyDifference* item.getProduct().getSavings();
+
+                    item.setQuantity(newQuantity);
                     notifyDataSetChanged();
                 }
 
@@ -199,10 +220,10 @@ public class CartListViewAdapter extends BaseAdapter {
 
     //Removes the specified item
     public void remove(CartItem cartItem) {
+      // Updating the total amount and savings based on the item being removed
+        totalSavings -= cartItem.getQuantity()*cartItem.getProduct().getSavings();
+        totalAmount -= cartItem.getQuantity()*cartItem.getProduct().getSellingPrice();
         cartItemList.remove(cartItem);
         itemTracker.remove(cartItem.getProduct().getBarcode());
-
-
     }
-
 }
