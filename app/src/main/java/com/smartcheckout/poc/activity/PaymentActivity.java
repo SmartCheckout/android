@@ -30,52 +30,73 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 public class PaymentActivity extends AppCompatActivity implements PaymentResultListener {
 
     private static String TAG = "PaymentActivity";
+    private static int paymentRetry = 0;
+    private static int paymentRetryLimit = 2;
+
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
        // setContentView(R.layout.activity_payment);
 
-        if(StateData.billAmount != 0.0f && StateData.storeName != null && StateData.transactionId != null){
-            //Update transaction status
+
+
+        if(preRequisiteCheck()){
             Log.d(TAG,"Payment pre-requisites met. Initiating payment");
-            JSONObject updateTransReq = new JSONObject();
-            try{
-                updateTransReq.put("trnsId", StateData.transactionId);
-                updateTransReq.put("status", TransactionStatus.PAYMENT_INITIATED);
-                updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
-                Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
-            }catch(Exception e){
-                //Todo
-            }
-
-            final Activity srcActivity = this;
-            try{
-                Checkout checkout = new Checkout();
-                Float amount = StateData.billAmount *100;
-                checkout.setImage(R.drawable.cart_launch_icon);
-                checkout.setKeyID("rzp_test_wnre6SUsbTyIJO");
-                checkout.setFullScreenDisable(true);
-
-                JSONObject options = new JSONObject();
-                options.put("key", "rzp_test_wnre6SUsbTyIJO");
-                options.put("name",StateData.storeName);
-                options.put("description", StateData.transactionId);
-                options.put("amount", amount.intValue());
-                options.put("currency", "INR");
-
-                checkout.open(srcActivity, options);
-                Log.d(TAG,"Payment request initiated");
-            }catch(JSONException je){
-                Log.e(TAG, je.getMessage());
-            }
-
+            launchRazorPay(this);
         }else{
-            Toast.makeText(this, "Amount not available in request", Toast.LENGTH_SHORT).show();
+            // Pre-requsites not met. returning to cart activity.
+            Toast.makeText(this, "Not eligible for payment", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, CartActivity.class));
         }
 
 
     }
+
+    public boolean preRequisiteCheck(){
+        return StateData.billAmount != 0.0f
+                && StateData.storeName != null
+                && StateData.transactionId != null;
+    }
+
+    public void launchRazorPay(Activity srcActivity){
+        try{
+            //Razor pay checkout object preparation
+            Checkout checkout = new Checkout();
+            JSONObject updateTransReq = new JSONObject();
+
+            Float amount = StateData.billAmount *100;
+            checkout.setImage(R.drawable.cart_launch_icon);
+            checkout.setKeyID("rzp_test_wnre6SUsbTyIJO");
+            checkout.setFullScreenDisable(true);
+
+            // Razor pay options
+            JSONObject options = new JSONObject();
+            options.put("key", "rzp_test_wnre6SUsbTyIJO");
+            options.put("name",StateData.storeName);
+            //options.put("description", StateData.transactionId);
+            options.put("amount", amount.intValue());
+            options.put("currency", "INR");
+
+            // Update transaction status
+            updateTransReq.put("trnsId", StateData.transactionId);
+            updateTransReq.put("status", TransactionStatus.PAYMENT_INITIATED);
+            updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
+            Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
+
+            // Trigger Razor Pay
+            checkout.open(srcActivity, options);
+            Log.d(TAG,"Payment request initiated");
+
+
+        }catch(JSONException je){
+            Log.e(TAG, je.getMessage());
+        }
+        catch(Exception e){
+            Log.e(TAG, ": " + e.getMessage());
+        }
+    }
+
 
     @Override
     public void onPaymentSuccess(String razorpayPaymentID) {
@@ -83,8 +104,8 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
         Log.d(TAG, "Payment successful. Gateway payment ref : " + razorpayPaymentID);
 
         JSONObject updateTransReq = new JSONObject();
-        JSONArray payments = new JSONArray();
         try{
+            // Updating transaction status and payment reference
             JSONObject payment = new JSONObject();
             payment.put("paymentGateway","RAZOR_PAY");
             payment.put("paymentRef",razorpayPaymentID);
@@ -96,6 +117,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
             Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
 
+            // Display transaction id QR code
             Bitmap myBitmap = QRCode.from(StateData.transactionId).bitmap();
             ImageView myImage = (ImageView) findViewById(R.id.trnsQRCode);
             myImage.setImageBitmap(myBitmap);
@@ -109,10 +131,13 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
     @Override
     public void onPaymentError(int code, String response) {
         Toast.makeText(this, code, Toast.LENGTH_SHORT).show();
-        Log.e(TAG,"Payment failure reqtured from gateway. " + response);
+        paymentRetry ++;
+        Log.e(TAG,String.format("Payment failure returned from gateway : %s. Current Retry Count : %d ", response, paymentRetry));
 
         JSONObject updateTransReq = new JSONObject();
         try{
+
+
             JSONObject payment = new JSONObject();
             payment.put("paymentGateway","RAZOR_PAY");;
             payment.put("paymentStatus",response);
@@ -123,6 +148,15 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
             updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
             Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
+
+            if(paymentRetry < paymentRetryLimit){
+                Log.d(TAG,"Launching Razor Pay");
+                launchRazorPay(this);
+            }else{
+                //Go to home page.
+            }
+
+
         }catch(Exception e){
             //Todo
         }
@@ -145,4 +179,6 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
         });
     }
+
+
 }
