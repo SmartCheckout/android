@@ -68,4 +68,6 @@
     </string-array>
     <string name="title_activity_payment">PaymentActivity</string>
     <string name="history">Transaction History</string>
+    <string name="retry">retry</string>
+    <string name="quit">quit</string>
 </resources>
