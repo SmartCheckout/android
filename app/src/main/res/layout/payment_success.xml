@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/succesIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.1"
+        app:srcCompat="@drawable/payment_success"
+        tools:layout_editor_absoluteX="172dp" />
+
+    <TextView
+        android:id="@+id/amountPaidHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/payment_succesful"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toStartOf="@+id/amountPaid"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/succesIcon" />
+
+    <TextView
+        android:id="@+id/amountPaid"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
+        app:layout_constraintBottom_toBottomOf="@+id/amountPaidHeading"
+        app:layout_constraintEnd_toStartOf="@+id/receiptDetails"
+        app:layout_constraintStart_toEndOf="@+id/amountPaidHeading"
+        app:layout_constraintTop_toTopOf="@+id/amountPaidHeading"
+        tools:layout_editor_absoluteX="0dp"
+        tools:text="$250" />
+
+    <TextView
+        android:id="@+id/receiptDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
+        app:layout_constraintBottom_toBottomOf="@+id/amountPaidHeading"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/amountPaid"
+        app:layout_constraintTop_toTopOf="@+id/amountPaidHeading"
+        tools:layout_editor_absoluteX="0dp"
+        android:text="Details" />
+
+    <ImageView
+        android:id="@+id/paidRecQR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/amountPaidHeading"
+        tools:layout_editor_absoluteX="172dp"
+        tools:src="@drawable/sample_qr" />
+
+    <TextView
+        android:id="@+id/showReceiptHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Please scan at exit"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paidRecQR" />
+
+</android.support.constraint.ConstraintLayout>
