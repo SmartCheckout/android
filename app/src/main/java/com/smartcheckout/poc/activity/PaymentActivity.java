@@ -1,10 +1,9 @@
 package com.smartcheckout.poc.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -35,7 +34,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_payment);
+       // setContentView(R.layout.activity_payment);
 
         if(StateData.billAmount != 0.0f && StateData.storeName != null && StateData.transactionId != null){
             //Update transaction status

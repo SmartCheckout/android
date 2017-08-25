@@ -70,4 +70,5 @@
     <string name="history">Transaction History</string>
     <string name="retry">retry</string>
     <string name="quit">quit</string>
+    <string name="payment_succesful">Payment Succesful</string>
 </resources>
