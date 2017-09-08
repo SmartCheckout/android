@@ -1,11 +1,15 @@
 package com.smartcheckout.poc.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -37,7 +41,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // setContentView(R.layout.activity_payment);
+        setContentView(R.layout.payment_success);
 
 
 
@@ -105,6 +109,18 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
         JSONObject updateTransReq = new JSONObject();
         try{
+
+            // Updating payment success view
+            setContentView(R.layout.payment_success);
+
+            // Display transaction id QR code
+            Bitmap myBitmap = QRCode.from(StateData.transactionId).bitmap();
+            ImageView myImage = (ImageView) findViewById(R.id.trnsQRCode);
+            ((TextView) findViewById(R.id.paymentStatus)).setText("Payment Successful!");
+            ((TextView) findViewById(R.id.amountPaid)).setText(StateData.billAmount.toString());
+            myImage.setImageBitmap(myBitmap);
+            Log.d(TAG,"Transaction bitmap generated");
+
             // Updating transaction status and payment reference
             JSONObject payment = new JSONObject();
             payment.put("paymentGateway","RAZOR_PAY");
@@ -117,12 +133,6 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
             Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
 
-            // Display transaction id QR code
-            Bitmap myBitmap = QRCode.from(StateData.transactionId).bitmap();
-            ImageView myImage = (ImageView) findViewById(R.id.trnsQRCode);
-            myImage.setImageBitmap(myBitmap);
-
-            Log.d(TAG,"Transaction bitmap generated");
         }catch(Exception e){
             //Todo
         }
@@ -136,7 +146,19 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
         JSONObject updateTransReq = new JSONObject();
         try{
-
+            // Updating payment success view
+            //setContentView(R.layout.payment_faliure);
+            ((TextView) findViewById(R.id.paymentFaliure)).setText("Payment Failed! "+ response);
+            ((Button) findViewById(R.id.retry)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(paymentRetry<paymentRetryLimit){
+                        launchRazorPay(PaymentActivity.this);
+                    }else{
+                        Toast.makeText(PaymentActivity.this, "Maximum payment reties exceeded", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
 
             JSONObject payment = new JSONObject();
             payment.put("paymentGateway","RAZOR_PAY");;
@@ -148,13 +170,6 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
             updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
             Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
-
-            if(paymentRetry < paymentRetryLimit){
-                Log.d(TAG,"Launching Razor Pay");
-                launchRazorPay(this);
-            }else{
-                //Go to home page.
-            }
 
 
         }catch(Exception e){
