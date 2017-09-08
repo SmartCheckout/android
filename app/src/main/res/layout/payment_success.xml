@@ -37,6 +37,7 @@
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 
+
         app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
         app:layout_constraintEnd_toStartOf="@+id/receiptDetails"
         app:layout_constraintStart_toEndOf="@+id/paymentStatus"
@@ -51,6 +52,7 @@
         android:layout_marginStart="4dp"
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
 
         app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
         app:layout_constraintEnd_toEndOf="parent"
