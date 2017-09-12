@@ -185,7 +185,7 @@ public class StoreSelectionActivity extends Activity implements
                     startLocationUpdates();
                 }
                 else  {
-                    createNoLocView(getResources().getString(R.string.no_loc_perm_denied));
+                    createNoLocView(getResources().getString(R.string.no_loc_scan_qr_store));
                 }
         }
     }
