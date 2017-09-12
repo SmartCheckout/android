@@ -18,7 +18,7 @@
         tools:layout_editor_absoluteX="172dp" />
 
     <TextView
-        android:id="@+id/amountPaidHeading"
+        android:id="@+id/paymentStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -37,10 +37,11 @@
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 
-        app:layout_constraintBottom_toBottomOf="@+id/amountPaidHeading"
+
+        app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
         app:layout_constraintEnd_toStartOf="@+id/receiptDetails"
-        app:layout_constraintStart_toEndOf="@+id/amountPaidHeading"
-        app:layout_constraintTop_toTopOf="@+id/amountPaidHeading"
+        app:layout_constraintStart_toEndOf="@+id/paymentStatus"
+        app:layout_constraintTop_toTopOf="@+id/paymentStatus"
         tools:layout_editor_absoluteX="0dp"
         tools:text="$250" />
 
@@ -52,21 +53,22 @@
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 
-        app:layout_constraintBottom_toBottomOf="@+id/amountPaidHeading"
+
+        app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/amountPaid"
-        app:layout_constraintTop_toTopOf="@+id/amountPaidHeading"
+        app:layout_constraintTop_toTopOf="@+id/paymentStatus"
         tools:layout_editor_absoluteX="0dp"
         android:text="Details" />
 
     <ImageView
-        android:id="@+id/paidRecQR"
+        android:id="@+id/trnsQRCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/amountPaidHeading"
+        app:layout_constraintTop_toBottomOf="@+id/paymentStatus"
         tools:layout_editor_absoluteX="172dp"
         tools:src="@drawable/sample_qr" />
 
@@ -79,6 +81,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/paidRecQR" />
+        app:layout_constraintTop_toBottomOf="@+id/trnsQRCode" />
 
 </android.support.constraint.ConstraintLayout>
