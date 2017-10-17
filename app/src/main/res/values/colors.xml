@@ -5,4 +5,5 @@
     <color name="colorAccent">#ffffff</color>
     <color name="white">#ffffff</color>
     <color name="bottomNavigationIc">#9E9E9E</color>
+    <color name="payment">#40D437</color>
 </resources>

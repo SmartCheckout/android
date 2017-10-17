@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -16,7 +17,6 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
@@ -30,14 +30,10 @@ import com.smartcheckout.poc.util.TransactionStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
@@ -53,18 +49,15 @@ public class CartActivity extends AppCompatActivity {
 
     //Floating action buttons
     private FloatingActionButton fabScan;
-    private FloatingActionButton fabCheckOut;
+    private Button fabCheckOut;
 
+    private Button payButton;
 
     private static final int RC_SCAN_BARCODE = 0;
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private CartListViewAdapter cartAdapter;
     private double totalBill;
     private double totalSavings;
-    private View transactionView;
-    private View paymentView;
-    private View mainContainerView;
-    private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
     private int emulatorCounter = 0;
     private String TAG = "CartActivity";
@@ -82,30 +75,17 @@ public class CartActivity extends AppCompatActivity {
             storeTitle = inputBundle.getString("StoreTitle");
             storeDisplayAddress = inputBundle.getString("StoreDisplayAddress");
 
-            //Set the cart layout & hide the payment view
+            //Set the cart layout
             setContentView(R.layout.activity_cart);
-            transactionView = findViewById(R.id.transactionContainer);
-            paymentView = findViewById(R.id.paymentContainer);
-            mainContainerView = findViewById(R.id.mainContainer);
-            mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            //Intitially hide the payment view
-            paymentView.setVisibility(View.GONE);
-            findViewById(R.id.payButton).setOnClickListener(new View.OnClickListener() {
+            //transactionView = findViewById(R.id.transactionContainer);
+            payButton = (Button)findViewById(R.id.payButton);
+            payButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     checkoutAndPay();
                 }
             });
-
-            //Close payment view when user clicks back on the main cart screen
-            mainContainerView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    closePaymentView();
-
-                }
-            });
+            payButton.setVisibility(View.INVISIBLE);
 
             //Display details of the store
             System.out.println("CartActivity --> Store title -->" + storeTitle);
@@ -126,16 +106,6 @@ public class CartActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     launchBarcodeScanner();
-
-                }
-            });
-
-            //Intiiate the cart checkout floating action and listener
-            fabCheckOut = (FloatingActionButton) findViewById(R.id.fabCheckOut);
-            fabCheckOut.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    launchBillView();
 
                 }
             });
@@ -206,6 +176,10 @@ public class CartActivity extends AppCompatActivity {
                     CartItem cartItem = new CartItem(product, 1);
                     System.out.println("Created cart item");
                     cartAdapter.addItem(cartItem);
+                    calculateBill();
+                    payButton.setText("PAY $"+bill.getTotalAmount());
+                    if(payButton.getVisibility() == View.INVISIBLE)
+                        payButton.setVisibility(View.VISIBLE);
                     System.out.println("Added cart item to adapter");
 
                 } catch (JSONException je) {
@@ -236,46 +210,11 @@ public class CartActivity extends AppCompatActivity {
         emulatorCounter++;
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
-       /* Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
+        /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
         populateDummyScanProd();
-    }
-
-    public void launchBillView() {
-
-
-        // Set the content payment view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        //Calcualte the total bill
-        calculateBill();
-        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.getTotalAmount());
-        ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
-
-        //make the floating aciton buttons disappear
-        fabScan.setVisibility(View.GONE);
-        fabCheckOut.setVisibility(View.GONE);
-
-        // Set the content payment view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        paymentView.setAlpha(0f);
-        paymentView.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        paymentView.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-    }
-
-    public void closePaymentView() {
-        paymentView.setVisibility(View.GONE);
-        //Make the floating action buttons visible
-        //make the floating aciton buttons disappear
-        fabScan.setVisibility(View.VISIBLE);
-        fabCheckOut.setVisibility(View.VISIBLE);
     }
 
     /*
@@ -348,12 +287,28 @@ public class CartActivity extends AppCompatActivity {
     
     public void populateDummyScanProd() {
 
-        if ((emulatorCounter % 3) == 0)
-            handleBarcode("5790");
-        else if ((emulatorCounter % 3) == 1)
-            handleBarcode("022000005120");
-        else
+        if ((emulatorCounter % 10) == 0)
+            handleBarcode("8901725133979");
+        else if ((emulatorCounter % 10) == 1)
+            handleBarcode("8901719255144");
+        else if ((emulatorCounter % 10) == 2)
+            handleBarcode("8901063093416");
+        else if ((emulatorCounter % 10) == 3)
+            handleBarcode("8904004400946");
+        else if ((emulatorCounter % 10) == 4)
             handleBarcode("02289902");
+        else if ((emulatorCounter % 10) == 5)
+            handleBarcode("022000005120");
+        else if ((emulatorCounter % 10) == 6)
+            handleBarcode("762111962614");
+        else if ((emulatorCounter % 3) == 7)
+            handleBarcode("05929031187");
+        else if ((emulatorCounter % 3) == 8)
+            handleBarcode("833091700241");
+        else if ((emulatorCounter % 3) == 9)
+            handleBarcode("8904208600913");
+        else
+            handleBarcode("83309170036");
     }
 
     public void createBottomNavView() {
