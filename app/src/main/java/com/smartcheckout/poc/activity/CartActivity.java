@@ -1,10 +1,14 @@
 package com.smartcheckout.poc.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -14,26 +18,39 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.barcode.Barcode;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.ResponseHandlerInterface;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
+import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
 import com.smartcheckout.poc.util.Currency;
 import com.smartcheckout.poc.util.TransactionStatus;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
@@ -49,23 +66,29 @@ public class CartActivity extends AppCompatActivity {
 
     //Floating action buttons
     private FloatingActionButton fabScan;
-    private Button fabCheckOut;
+    private FloatingActionButton fabCheckOut;
 
-    private Button payButton;
 
     private static final int RC_SCAN_BARCODE = 0;
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private CartListViewAdapter cartAdapter;
     private double totalBill;
     private double totalSavings;
+    private View transactionView;
+    private View paymentView;
+    private View mainContainerView;
+    private int mShortAnimationDuration;
     private BottomNavigationView bottomNavigationView;
     private int emulatorCounter = 0;
     private String TAG = "CartActivity";
+    private  Context ctx= this.getApplication();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("Creating Cart activity");
+
+
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
@@ -75,30 +98,107 @@ public class CartActivity extends AppCompatActivity {
             storeTitle = inputBundle.getString("StoreTitle");
             storeDisplayAddress = inputBundle.getString("StoreDisplayAddress");
 
-            //Set the cart layout
+            //Set the cart layout & hide the payment view
             setContentView(R.layout.activity_cart);
-            //transactionView = findViewById(R.id.transactionContainer);
-            payButton = (Button)findViewById(R.id.payButton);
-            payButton.setOnClickListener(new View.OnClickListener() {
+            transactionView = findViewById(R.id.transactionContainer);
+            paymentView = findViewById(R.id.paymentContainer);
+            mainContainerView = findViewById(R.id.mainContainer);
+            mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            //Intitially hide the payment view
+            paymentView.setVisibility(View.GONE);
+            findViewById(R.id.payButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    checkoutAndPay();
+                    try
+                    {
+                        persistTransactionData(true,TransactionStatus.CHECKOUT);
+                    }
+                    catch (Exception e)
+                    {
+                        // TODO: handle
+                    }
                 }
             });
-            payButton.setVisibility(View.INVISIBLE);
+
+            //Close payment view when user clicks back on the main cart screen
+            mainContainerView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    closePaymentView();
+
+                }
+            });
 
             //Display details of the store
             System.out.println("CartActivity --> Store title -->" + storeTitle);
             ((TextView) findViewById(R.id.storeTitle)).setText(storeTitle);
             ((TextView) findViewById(R.id.storeAddress)).setText(storeDisplayAddress);
 
-            //Link the cartList and the adapter
-            cartAdapter = new CartListViewAdapter(this);
-            cartListView = (ListView) findViewById(R.id.cartList);
-            cartListView.setAdapter(cartAdapter);
+            boolean newTransaction = false;
+            // coming back from payment view
+            if(inputBundle.containsKey("TransactionId") && inputBundle.get("TransactionId") != null)
+            {
+                StateData.transactionId = inputBundle.getString("TransactionId");
+                Log.d(TAG, "Retrieve Existing transaction " + inputBundle.get("TransactionId") );
 
-            //Set swipe to delete functionlaity
-            setSwipeDelItem();
+            }
+            // retrieving from saved instance
+            else if (SharedPreferrencesUtil.getStringPreference(this,"TransactionId") != null)
+            {
+                StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
+                Log.d(TAG, "Retrieve Existing transaction " + SharedPreferrencesUtil.getStringPreference(this,"TransactionId")  );
+            }
+
+            // first time activity is created
+            else
+            {
+                newTransaction =  true;
+                Log.d(TAG, "creating transcation for first time"   );
+
+                try {
+                    persistTransactionData(false,TransactionStatus.INITIATED);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(!newTransaction) {
+
+                String getTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction";
+                RequestParams params = new RequestParams();
+                params.put("trnsId", StateData.transactionId);
+
+                ahttpClient.get(getTrnsEP, params, new JsonHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                        Log.d(TAG, "Retrieved Cart " + response.toString() );
+                        Type listType = new TypeToken<ArrayList<CartItem>>(){}.getType();
+                        List<CartItem> cartList = null;
+                        try {
+                            cartList = new Gson().fromJson(response.getJSONArray("cart").toString(), listType);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        cartAdapter = new CartListViewAdapter(CartActivity.this.getApplicationContext(),cartList);
+                        //Link the cartList and the adapter
+                        cartListView = (ListView) findViewById(R.id.cartList);
+                        cartListView.setAdapter(cartAdapter);
+                        //Set swipe to delete functionlaity
+                        setSwipeDelItem();
+                    }
+                });
+
+            }
+            else{
+                cartAdapter = new CartListViewAdapter(this);
+                //Link the cartList and the adapter
+                cartListView = (ListView) findViewById(R.id.cartList);
+                cartListView.setAdapter(cartAdapter);
+                //Set swipe to delete functionlaity
+                setSwipeDelItem();
+            }
 
             //Initialize the scan button and its clickListener
             fabScan = (FloatingActionButton) findViewById(R.id.fabScan);
@@ -106,6 +206,16 @@ public class CartActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     launchBarcodeScanner();
+
+                }
+            });
+
+            //Intiiate the cart checkout floating action and listener
+            fabCheckOut = (FloatingActionButton) findViewById(R.id.fabCheckOut);
+            fabCheckOut.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    launchBillView();
 
                 }
             });
@@ -119,6 +229,19 @@ public class CartActivity extends AppCompatActivity {
         }
         //cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
 
+    }
+
+    @Override
+    public void onStop() {
+
+        super.onStop();
+        try {
+            persistTransactionData(false,TransactionStatus.SUSPENDED);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        SharedPreferrencesUtil.setStringPreference(this,"TransactionId",StateData.transactionId);
     }
 
     @Override
@@ -176,10 +299,6 @@ public class CartActivity extends AppCompatActivity {
                     CartItem cartItem = new CartItem(product, 1);
                     System.out.println("Created cart item");
                     cartAdapter.addItem(cartItem);
-                    calculateBill();
-                    payButton.setText("PAY $"+bill.getTotalAmount());
-                    if(payButton.getVisibility() == View.INVISIBLE)
-                        payButton.setVisibility(View.VISIBLE);
                     System.out.println("Added cart item to adapter");
 
                 } catch (JSONException je) {
@@ -217,71 +336,164 @@ public class CartActivity extends AppCompatActivity {
         populateDummyScanProd();
     }
 
-    /*
-    * Triggered when the user clicks the pay button from bill view
-    * Prerequisite : bill is calculated.
-    * Actions : persists transaction into db and initiates payment activity
-    * */
-    public void checkoutAndPay(){
-        if(bill != null){
+    public void launchBillView() {
+
+
+        // Set the content payment view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        //Calcualte the total bill
+        calculateBill();
+        ((TextView)paymentView.findViewById(R.id.totalAmount)).setText(""+bill.getTotalAmount());
+        ((TextView)paymentView.findViewById(R.id.saving)).setText(""+bill.getSavings());
+
+        //make the floating aciton buttons disappear
+        fabScan.setVisibility(View.GONE);
+        fabCheckOut.setVisibility(View.GONE);
+
+        // Set the content payment view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        paymentView.setAlpha(0f);
+        paymentView.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        paymentView.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+    }
+
+    public void closePaymentView() {
+        paymentView.setVisibility(View.GONE);
+        //Make the floating action buttons visible
+        //make the floating aciton buttons disappear
+        fabScan.setVisibility(View.VISIBLE);
+        fabCheckOut.setVisibility(View.VISIBLE);
+    }
+
+    public JSONArray getCart() throws JSONException {
+        JSONObject cartDetailsJson = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        Log.d(TAG, "getcart " );
+
+
+        if(cartAdapter == null || cartAdapter.getCartItemList() == null || cartAdapter.getCartItemList().isEmpty())
+            return null;
+        for(CartItem item : cartAdapter.getCartItemList()) {
+
+            Product product = item.getProduct();
+            JSONObject productObj = new JSONObject();
+            productObj.put("uniqueId",product.getUniqueId());
+            productObj.put("barcode",product.getBarcode());
+            productObj.put("title",product.getTitle());
+            productObj.put("description",product.getDescription());
+            productObj.put("category",product.getCategory());
+            productObj.put("retailPrice",product.getRetailPrice());
+            productObj.put("discount",product.getDiscount());
+
+            JSONObject cartObj = new JSONObject();
+            cartObj.put("product",productObj);
+            cartObj.put("quantity",item.getQuantity());
+
+
+            jsonArray.put(cartObj);
+        }
+
+        return jsonArray;
+
+    }
+
+    public void persistTransactionData(final boolean launchPayment,TransactionStatus status) throws JSONException {
+        String currentTS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
+        //Store object preparation
+        JSONObject store = new JSONObject();
+        store.put("id", StateData.storeId);
+        JSONObject jBill = null;
+        if(bill != null) {
+            //Bill object preparation
+            jBill = new JSONObject();
+            jBill.put("subTotal", bill.getSubTotal());
+            jBill.put("tax", bill.getTax());
+            jBill.put("currency", bill.getCurrency().toString());
+            jBill.put("total", bill.getTotalAmount());
+            jBill.put("savings", bill.getSavings());
+
+            StateData.billAmount = bill.getTotalAmount();
+
+        }
+        JSONArray cart = getCart();
+
+
+        if (StateData.transactionId == null) {
             // Persist transaction to
             String createTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/create";
             JSONObject createTrnsReq = new JSONObject();
-            StateData.billAmount = bill.getTotalAmount();
-            try{
-                String currentTS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
-                //Store object preparation
-                JSONObject store = new JSONObject();
-                store.put("id",StateData.storeId);
 
-                //Bill object preparation
-                JSONObject jBill = new JSONObject();
-                jBill.put("subTotal",bill.getSubTotal());
-                jBill.put("tax", bill.getTax());
-                jBill.put("currency", bill.getCurrency().toString());
-                jBill.put("total",bill.getTotalAmount());
-                jBill.put("savings",bill.getSavings());
-
-                createTrnsReq.put("trnsDate", currentTS );
-                createTrnsReq.put("status", TransactionStatus.CHECKOUT);
-                createTrnsReq.put("createTS", currentTS);
-                createTrnsReq.put("updateTS", currentTS);
-                createTrnsReq.put("store", store);
-                createTrnsReq.put("bill", jBill);
-
-            }catch(JSONException je){
-                je.printStackTrace();
-            }
-
-
+            createTrnsReq.put("trnsDate", currentTS);
+            createTrnsReq.put("status", status);
+            createTrnsReq.put("createTS", currentTS);
+            createTrnsReq.put("updateTS", currentTS);
+            createTrnsReq.put("store", store);
+            createTrnsReq.put("cart",cart);
+            createTrnsReq.put("bill", jBill);
 
             StateData.status = TransactionStatus.CHECKOUT;
             // Invoking create transaction
             StringEntity requestEntity = new StringEntity(createTrnsReq.toString(), ContentType.APPLICATION_JSON);
-            Log.d(TAG,"Invoking create transaction. Request : "+ createTrnsReq.toString());
-            ahttpClient.post(this, createTrnsEP, requestEntity, "application/json" , new JsonHttpResponseHandler(){
+            Log.d(TAG, "Invoking create transaction. Request : " + createTrnsReq.toString());
+            ahttpClient.post(this, createTrnsEP, requestEntity, "application/json", new JsonHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                   try{
-                       //Setting transaction id into state data
-                       Log.d(TAG, "Create Transaction Successful");
-                       StateData.transactionId = response.getString("trnsId");
-                       Log.d(TAG, "Generated transaction id : "+  StateData.transactionId);
-
-                       Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
-                       startActivity(paymentIntent);
-                   }catch(Exception e){
-
-                   }
+                    try {
+                        //Setting transaction id into state data
+                        Log.d(TAG, "Create Transaction Successful");
+                        StateData.transactionId = response.getString("trnsId");
+                        Log.d(TAG, "Generated transaction id : " + StateData.transactionId);
+                        if(launchPayment) {
+                            Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
+                            startActivity(paymentIntent);
+                        }
+                    } catch (Exception e) {
+                        // TODO: throw custom exception
+                    }
 
                 }
 
             });
+        } else {
+            JSONObject updateTransReq = new JSONObject();
+            updateTransReq.put("trnsId", StateData.transactionId);
+            updateTransReq.put("status", status);
+            updateTransReq.put("trnsDate", currentTS);
+            updateTransReq.put("updateTS", currentTS);
+            updateTransReq.put("store", store);
+            updateTransReq.put("bill", jBill);
+            updateTransReq.put("cart",cart);
+
+            HttpEntity requestEntity = new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON);
+            Log.d(TAG, "Update transaction status triggered. " + updateTransReq.toString());
+
+            String updateTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/update";
+            ahttpClient.post(this, updateTrnsEP, requestEntity, "application/json", new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    try {
+                        //Setting transaction id into state data
+                        Log.d(TAG, "Update Transaction Successful");
+                        StateData.transactionId = response.getString("trnsId");
+                        Log.d(TAG, "Updated transaction id : " + StateData.transactionId);
+
+                        if(launchPayment) {
+                            Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
+                            startActivity(paymentIntent);
+                        }
+                    } catch (Exception e) {
+                        // TODO: throw custom exception
+
+                    }
+                }
+            });
         }
-
-    }
-
-    public void persistTransactionData(){
 
     }
     

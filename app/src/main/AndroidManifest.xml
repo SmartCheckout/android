@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -31,7 +30,8 @@
         <activity
             android:name=".activity.LoginActivity"
             android:label="Smart checkout"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -40,13 +40,16 @@
         </activity>
         <activity
             android:name=".activity.StoreSelectionActivity"
-            android:label="Store Selection" />
+            android:label="Store Selection"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
         <activity
             android:name=".activity.ScanBarcodeActivity"
-            android:label="Scan Barcode" />
+            android:label="Scan Barcode"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
         <activity
             android:name=".activity.CartActivity"
-            android:label="Shopping cart" />
+            android:label="Shopping cart"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.

@@ -88,8 +88,11 @@ public class StoreSelectionActivity extends Activity implements
 
     public void startLocationUpdates(){
 
+
         if(locationEnabled){
+
             if (ActivityCompat.checkSelfPermission(StoreSelectionActivity.this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+
                 String[] requiredPermission = {ACCESS_FINE_LOCATION};
                 ActivityCompat.requestPermissions(StoreSelectionActivity.this,requiredPermission,RC_LOCATION_PERMISSION);
             }else {
@@ -204,7 +207,6 @@ public class StoreSelectionActivity extends Activity implements
             //Location Setting Result Handler
             @Override
             public void onResult(LocationSettingsResult result) {
-                System.out.println("Location Setting result");
                 final Status status = result.getStatus();
                 switch (status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
@@ -266,6 +268,7 @@ public class StoreSelectionActivity extends Activity implements
                         System.out.println("Before launching cart activity");
                         StateData.storeId = selectedStore.getId();
                         StateData.storeName = selectedStore.getTitle();
+                        StateData.store = selectedStore;
                         launchCartActivity();
                     }
                 } catch (JSONException je) {
@@ -410,6 +413,5 @@ public class StoreSelectionActivity extends Activity implements
         System.out.println("Connection done");
 
     }
-
 
 }

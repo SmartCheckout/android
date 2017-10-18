@@ -51,9 +51,17 @@ public class CartListViewAdapter extends BaseAdapter {
 
     //Creates an adapter from an already defined list
     public CartListViewAdapter(Context context, List<CartItem> cartItemList) {
-        this(context);
+        super();
+        this.context = context;
+        this.quantList = new ArrayList<Integer>();
+        this.cartItemList = new ArrayList<CartItem>();
+        this.itemTracker = new HashMap<>();
+
+        for (int i=1; i <= 5; i++) {
+            this.quantList.add(i);
+        }
         for (CartItem item : cartItemList) {
-            itemTracker.put(item.getProduct().getBarcode(), item);
+            addItem(item);
         }
     }
 
@@ -188,7 +196,7 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.quantity.setSelection(viewHolder.quantityAdapter.getPosition(item.getQuantity()));
 
             System.out.println("Product image url -->"+item.getProduct().getImagePath());
-            loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
+          //  loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
 
             // Check with Yesh whether savings need to be shown at item level
             /*if(savings >0){

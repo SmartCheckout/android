@@ -8,5 +8,7 @@ public enum TransactionStatus {
     CHECKOUT,
     PAYMENT_INITIATED,
     PAYMENT_SUCCESSFUL,
-    PAYMENT_FAILURE
+    PAYMENT_FAILURE,
+    INITIATED,
+    SUSPENDED
 }

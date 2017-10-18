@@ -17,6 +17,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 import com.smartcheckout.poc.R;
+import com.smartcheckout.poc.models.Store;
 import com.smartcheckout.poc.util.StateData;
 import com.smartcheckout.poc.util.TransactionStatus;
 
@@ -52,7 +53,15 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
         }else{
             // Pre-requsites not met. returning to cart activity.
             Toast.makeText(this, "Not eligible for payment", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, CartActivity.class));
+            Intent cartActivityIntent = new Intent(this,CartActivity.class);
+
+            Store selectedStore = StateData.store;
+            cartActivityIntent.putExtra("StoreId",selectedStore.getId());
+            cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
+            cartActivityIntent.putExtra("StoreDisplayAddress", selectedStore.getDisplayAddress());
+            cartActivityIntent.putExtra("TransactionId", StateData.transactionId);
+
+            startActivity(cartActivityIntent);
         }
 
 
