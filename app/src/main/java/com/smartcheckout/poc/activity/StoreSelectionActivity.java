@@ -1,6 +1,8 @@
 package com.smartcheckout.poc.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -12,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -33,11 +36,15 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.util.CommonUtils;
+import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -325,6 +332,7 @@ public class StoreSelectionActivity extends Activity implements
     }
 
 
+
     //Methods to launch applications activities. scanType should be a predefined constant for store or product(i.e.RC_SCAN_BARCODE_STORE etc.)
     public void launchScanBarcode(int scanType){
         Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
@@ -332,18 +340,66 @@ public class StoreSelectionActivity extends Activity implements
     }
 
     public void launchCartActivity(){
-        System.out.println("Launching cart activity");
-        if(selectedStore!=null){
-            System.out.println("Launching cart activity");
-            Intent cartActivityIntent = new Intent(this,CartActivity.class);
-            cartActivityIntent.putExtra("StoreId",selectedStore.getId());
-            cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
-            cartActivityIntent.putExtra("StoreDisplayAddress", selectedStore.getDisplayAddress());
 
-            startActivity(cartActivityIntent);
-        }
+        final Intent cartActivityIntent = new Intent(this,CartActivity.class);
+        cartActivityIntent.putExtra("StoreId",selectedStore.getId());
+        cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
+        cartActivityIntent.putExtra("StoreDisplayAddress", selectedStore.getDisplayAddress());
+
+
+        // check if there is a pending transaction
+         if (SharedPreferrencesUtil.getStringPreference(this,"TransactionId") != null )
+         {
+             Date lastTransactionDate = SharedPreferrencesUtil.getDatePreference(this,"TransactionUpdatedDate",null);
+
+             // if the last transaction was left pending under "N" minutes
+             long minute_diff = CommonUtils.getDifferenceinMinutes(lastTransactionDate,CommonUtils.getCurrentDate());
+             Log.d("tag","last pending transaction in "+ minute_diff);
+             if( minute_diff < 1)
+             {
+                 StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
+
+                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                         StoreSelectionActivity.this);
+
+
+                 // set dialog message
+                 alertDialogBuilder
+                         .setMessage(R.string.saved_transaction_dialog)
+                         .setCancelable(false)
+                         .setPositiveButton(R.string.continue_transaction,new DialogInterface.OnClickListener() {
+                             public void onClick(DialogInterface dialog,int id) {
+                                 cartActivityIntent.putExtra("TransactionId", StateData.transactionId);
+                                 startActivity(cartActivityIntent);
+
+
+                             }
+                         })
+                         .setNegativeButton(R.string.start_over,new DialogInterface.OnClickListener() {
+                             public void onClick(DialogInterface dialog,int id) {
+                                 StateData.transactionId = null;
+                                 SharedPreferrencesUtil.setStringPreference(getApplicationContext(),"TransactionId", null);
+                                 startActivity(cartActivityIntent);
+
+                             }
+                         });
+                 // create alert dialog
+                 AlertDialog alertDialog = alertDialogBuilder.create();
+
+                 alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                 alertDialog.show();
+
+             }
+             else
+                 startActivity(cartActivityIntent);
+
+
+         }
+         else
+             startActivity(cartActivityIntent);
 
     }
+
 
     // Call back handler for receiving location updates
     @Override

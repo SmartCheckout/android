@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -189,4 +190,46 @@ final public class SharedPreferrencesUtil {
         }
         return false;
     }
+
+    /**
+     * Helper method to retrieve a date value from {@link SharedPreferences}.
+     *
+     * @param context a {@link Context} object.
+     * @param key
+     * @param defaultValue A default to return if the value could not be read.
+     * @return The value from shared preferences, or the provided default.
+     */
+    public static Date getDatePreference(Context context, String key, Date defaultValue) {
+        Date value = null;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+             value = new Date(preferences.getLong(key, 0));
+        }
+        return value;
+    }
+
+
+    /**
+     * Helper method to write a Date value to {@link SharedPreferences}.
+     *
+     * @param context a {@link Context} object.
+     * @param key
+     * @param value
+     * @return true if the new value was successfully written to persistent storage.
+     */
+    public static boolean setDatePreference(Context context, String key, Date value) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+            Date date = new Date(System.currentTimeMillis()); //or simply new Date();
+
+            //converting it back to a milliseconds representation:
+            long millis = value.getTime();
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putLong(key, millis);
+            return editor.commit();
+        }
+        return false;
+    }
 }
+
+

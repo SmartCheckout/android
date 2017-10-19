@@ -71,4 +71,7 @@
     <string name="retry">retry</string>
     <string name="quit">quit</string>
     <string name="payment_succesful">Payment Succesful</string>
+    <string name="saved_transaction_dialog">You have a pending transaction at this store</string>
+    <string name="continue_transaction">Continue</string>
+    <string name="start_over">Start Over</string>
 </resources>

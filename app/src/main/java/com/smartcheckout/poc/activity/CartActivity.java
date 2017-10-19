@@ -30,6 +30,7 @@ import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
+import com.smartcheckout.poc.util.CommonUtils;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
 import com.smartcheckout.poc.util.Currency;
@@ -132,11 +133,11 @@ public class CartActivity extends AppCompatActivity {
 
             }
             // retrieving from saved instance
-            else if (SharedPreferrencesUtil.getStringPreference(this,"TransactionId") != null)
-            {
-                StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
-                Log.d(TAG, "Retrieve Existing transaction " + SharedPreferrencesUtil.getStringPreference(this,"TransactionId")  );
-            }
+//            else if (SharedPreferrencesUtil.getStringPreference(this,"TransactionId") != null)
+//            {
+//                StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
+//                Log.d(TAG, "Retrieve Existing transaction " + SharedPreferrencesUtil.getStringPreference(this,"TransactionId")  );
+//            }
 
             // first time activity is created
             else
@@ -218,11 +219,17 @@ public class CartActivity extends AppCompatActivity {
         super.onStop();
         try {
             persistTransactionData(false,TransactionStatus.SUSPENDED);
+            // if the cart is empty dont remember this transaction
+            if(cartAdapter != null && cartAdapter.getCartItemList() != null && cartAdapter.getCount() > 0)
+            {
+                SharedPreferrencesUtil.setStringPreference(this,"TransactionId",StateData.transactionId);
+                SharedPreferrencesUtil.setDatePreference(this,"TransactionUpdatedDate", CommonUtils.getCurrentDate());
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        SharedPreferrencesUtil.setStringPreference(this,"TransactionId",StateData.transactionId);
+
     }
 
     @Override
