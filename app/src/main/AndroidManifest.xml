@@ -31,14 +31,14 @@
 
         android:theme="@style/AppTheme">
 
-        <receiver
+        <!--receiver
             android:name="com.smartcheckout.poc.receivers.NetworkChangeReceiver"
             android:label="NetworkChangeReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
             </intent-filter>
-        </receiver>
+        </receiver-->
         <activity
             android:name=".activity.LoginActivity"
             android:label="Smart checkout"
