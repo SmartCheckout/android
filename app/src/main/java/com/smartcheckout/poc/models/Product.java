@@ -15,7 +15,6 @@ public class Product{
 	private String category;
 	private Double retailPrice;
 	private Float discount;
-    private String imagePath;
 
 	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount) {
 		this.uniqueId = uniqueId;
@@ -25,7 +24,6 @@ public class Product{
 		this.category = category;
 		this.retailPrice = retailPrice;
 		this.discount = discount;
-        setImagePath(this.barcode);
 
 	}
 
@@ -94,19 +92,17 @@ public class Product{
 	}
 
     public String getImagePath() {
-        return imagePath;
-    }
 
-    private void setImagePath(String barcode) {
-
-        try {
-            String baseURL = PropertiesUtil.getProperty("baseProductURL",getApplicationContext());
-            String fileFormat = PropertiesUtil.getProperty("prodFileType",getApplicationContext());
-            this.imagePath= baseURL.concat(""+barcode).concat(fileFormat);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		try {
+			String baseURL = PropertiesUtil.getProperty("baseProductURL",getApplicationContext());
+			String fileFormat = PropertiesUtil.getProperty("prodFileType",getApplicationContext());
+			return  baseURL.concat(""+barcode).concat(fileFormat);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 
     }
+
 
 }

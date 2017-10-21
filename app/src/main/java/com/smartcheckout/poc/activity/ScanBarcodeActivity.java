@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -23,6 +24,9 @@ import com.smartcheckout.poc.R;
 
 import java.io.IOException;
 
+import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_ITEM;
+import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_STORE;
+
 public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     private SurfaceView cameraView = null;
     private BarcodeDetector barcodeDetector = null;
@@ -34,6 +38,39 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scan_main);
+
+        CountDownTimer countDownTimer = new CountDownTimer(30000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                //TODO: Do something every second
+            }
+
+            public void onFinish() {
+
+                Intent initiatingIntent = getIntent();
+
+                if(initiatingIntent != null && initiatingIntent.getExtras() != null)
+                {
+                    int requestCode = initiatingIntent.getExtras().getInt("requestCode");
+                    Intent intent = null;
+                    if(requestCode == RC_SCAN_BARCODE_ITEM)
+                    {
+                        intent = new Intent(ScanBarcodeActivity.this, CartActivity.class);
+
+                    }
+                    else if(requestCode == RC_SCAN_BARCODE_STORE)
+                    {
+                        intent = new Intent(ScanBarcodeActivity.this, StoreSelectionActivity.class);
+
+                    }
+                    intent.putExtra("Reason","Timeout");
+                    ScanBarcodeActivity.this.setResult(RESULT_CANCELED,intent);
+                    finish();
+                }
+
+
+            }
+        }.start();
 
         this.cameraView = (SurfaceView) findViewById(R.id.camera_view);
         this.barcodeDetector = new BarcodeDetector.Builder(this).build();
@@ -107,6 +144,32 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
         this.setResult(RESULT_OK,intent);
         finish();
 
+
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        Intent initiatingIntent = getIntent();
+
+        if(initiatingIntent != null && initiatingIntent.getExtras() != null)
+        {
+            int requestCode = initiatingIntent.getExtras().getInt("requestCode");
+            Intent intent = null;
+            if(requestCode == RC_SCAN_BARCODE_ITEM)
+            {
+                intent = new Intent(ScanBarcodeActivity.this, CartActivity.class);
+
+            }
+            else if(requestCode == RC_SCAN_BARCODE_STORE)
+            {
+                intent = new Intent(ScanBarcodeActivity.this, StoreSelectionActivity.class);
+
+            }
+            intent.putExtra("Reason","NA");
+            ScanBarcodeActivity.this.setResult(RESULT_CANCELED,intent);
+            finish();
+        }
 
     }
 }

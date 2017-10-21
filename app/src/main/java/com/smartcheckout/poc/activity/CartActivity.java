@@ -3,6 +3,7 @@ package com.smartcheckout.poc.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.gson.Gson;
@@ -55,6 +57,8 @@ import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
+import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_ITEM;
+
 public class CartActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
@@ -71,7 +75,7 @@ public class CartActivity extends AppCompatActivity {
     private Button payButton;
 
 
-    private static final int RC_SCAN_BARCODE = 0;
+
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private CartListViewAdapter cartAdapter;
     private double totalBill;
@@ -174,6 +178,12 @@ public class CartActivity extends AppCompatActivity {
                         //Link the cartList and the adapter
                         cartListView = (ListView) findViewById(R.id.cartList);
                         cartListView.setAdapter(cartAdapter);
+                        cartAdapter.registerDataSetObserver(new DataSetObserver() {
+                            @Override
+                            public void onChanged() {
+                                updateAndShowBill();
+                            }
+                        });
                         //Set swipe to delete functionlaity
                         setSwipeDelItem();
                         if(cartList!= null && !cartList.isEmpty()){
@@ -188,6 +198,12 @@ public class CartActivity extends AppCompatActivity {
                 //Link the cartList and the adapter
                 cartListView = (ListView) findViewById(R.id.cartList);
                 cartListView.setAdapter(cartAdapter);
+                cartAdapter.registerDataSetObserver(new DataSetObserver() {
+                    @Override
+                    public void onChanged() {
+                        updateAndShowBill();
+                    }
+                });
                 //Set swipe to delete functionlaity
                 setSwipeDelItem();
             }
@@ -236,11 +252,19 @@ public class CartActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Bundle bundle = data.getExtras();
         switch (requestCode) {
-            case RC_SCAN_BARCODE:
-                if (bundle.containsKey("Barcode")) {
+            case RC_SCAN_BARCODE_ITEM:
+                if (resultCode == RESULT_OK) {
                     Barcode barcode = bundle.getParcelable("Barcode");
-                    System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
-                    handleBarcode(barcode.displayValue);
+                    if(barcode != null) {
+                        System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
+                        handleBarcode(barcode.displayValue);
+                    }
+                }
+                else if(resultCode == RESULT_CANCELED )
+                {
+                    String reason = bundle.getString("Reason");
+                    if(reason != null && reason.equalsIgnoreCase("Timeout"))
+                        Toast.makeText(this,getResources().getString(R.string.toast_scan_timedout),Toast.LENGTH_LONG).show();
                 }
                 break;
         }
@@ -287,7 +311,6 @@ public class CartActivity extends AppCompatActivity {
                     CartItem cartItem = new CartItem(product, 1);
                     System.out.println("Created cart item");
                     cartAdapter.addItem(cartItem);
-                    updateAndShowBill();
                     System.out.println("Added cart item to adapter");
 
                 } catch (JSONException je) {
@@ -327,7 +350,8 @@ public class CartActivity extends AppCompatActivity {
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
         /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
-        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE);*/
+        barcodeScanIntent.putExtra("requestCode",RC_SCAN_BARCODE_ITEM);
+        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM);*/
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
         populateDummyScanProd();
@@ -539,4 +563,7 @@ public class CartActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+    }
 }
