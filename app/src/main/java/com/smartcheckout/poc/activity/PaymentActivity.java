@@ -45,8 +45,6 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
         setContentView(R.layout.payment_success);
 
 
-
-
         if(preRequisiteCheck()){
             Log.d(TAG,"Payment pre-requisites met. Initiating payment");
             launchRazorPay(this);
@@ -204,6 +202,8 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
         });
     }
-
+    @Override
+    public void onBackPressed() {
+    }
 
 }

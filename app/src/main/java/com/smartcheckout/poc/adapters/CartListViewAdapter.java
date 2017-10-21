@@ -196,7 +196,7 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.quantity.setSelection(viewHolder.quantityAdapter.getPosition(item.getQuantity()));
 
             System.out.println("Product image url -->"+item.getProduct().getImagePath());
-          //  loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
+            loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
 
             // Check with Yesh whether savings need to be shown at item level
             /*if(savings >0){

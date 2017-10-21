@@ -24,4 +24,8 @@ public class PostSignOut extends AppCompatActivity {
                     }
                 });
     }
+
+    @Override
+    public void onBackPressed() {
+    }
 }

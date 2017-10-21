@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.AnimationDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -16,8 +17,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -49,6 +53,7 @@ import java.util.Date;
 import cz.msebera.android.httpclient.Header;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_STORE;
 
 
 /**
@@ -67,7 +72,6 @@ public class StoreSelectionActivity extends Activity implements
     private static final int RC_CHECK_SETTING = 2;
 
    // private static final int RC_SCAN_BARCODE_PROD = 100;
-    private static final int RC_SCAN_BARCODE_STORE = 200;
 
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private Store selectedStore;
@@ -77,6 +81,7 @@ public class StoreSelectionActivity extends Activity implements
     private int locationRetryLimit = 5;
     private static final String TAG = "StoreSelectionActivity";
 
+    AnimationDrawable frameAnimation = null;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
@@ -127,7 +132,18 @@ public class StoreSelectionActivity extends Activity implements
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
-        setTheme(R.style.SplashTheme);
+        setContentView(R.layout.cart_loading);
+        ImageView img = (ImageView)findViewById(R.id.cart_animation);
+        System.out.println("ImageView"+img);
+        //img.setBackgroundResource(R.drawable.cart_loader);
+
+
+        // Get the background, which has been compiled to an AnimationDrawable object.
+        AnimationDrawable frameAnimation = (AnimationDrawable) img.getDrawable();
+
+        // Start the animation (looped playback by default).
+        frameAnimation.start();
+
         super.onCreate(savedInstanceState);
         //Conenct Google API client. Will receive call back. See appropriate method for success or faliure
         connectGoogleApiClient();
@@ -142,6 +158,9 @@ public class StoreSelectionActivity extends Activity implements
     @Override
     protected void onStop() {
         super.onStop();
+
+        if(frameAnimation != null)
+            frameAnimation.stop();
         if(mGoogleApiClient!=null && mGoogleApiClient.isConnected()){
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, StoreSelectionActivity.this);
             mGoogleApiClient.disconnect();
@@ -167,11 +186,22 @@ public class StoreSelectionActivity extends Activity implements
         Bundle bundle = data.getExtras();
         switch (requestCode) {
             case RC_SCAN_BARCODE_STORE:
-                if (bundle.containsKey("Barcode")) {
+
+                if (resultCode == RESULT_OK ) {
                     Barcode barcode = bundle.getParcelable("Barcode");
-                    Log.d(TAG,"=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
-                    findStoreByBarcode(barcode.displayValue);
+                    if(barcode != null) {
+                        Log.d(TAG, "=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
+                        findStoreByBarcode(barcode.displayValue);
+                    }
                 }
+                else if(resultCode == RESULT_CANCELED  )
+                {
+                    String reason = bundle.getString("Reason");
+                    if(reason != null && reason.equalsIgnoreCase("Timeout"))
+                        Toast.makeText(this,getResources().getString(R.string.toast_scan_timedout),Toast.LENGTH_LONG).show();
+                }
+
+
                 break;
             case RC_CHECK_SETTING: // Response from location enabled
                 switch (resultCode) {
@@ -336,6 +366,7 @@ public class StoreSelectionActivity extends Activity implements
     //Methods to launch applications activities. scanType should be a predefined constant for store or product(i.e.RC_SCAN_BARCODE_STORE etc.)
     public void launchScanBarcode(int scanType){
         Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
+        barcodeScanIntent.putExtra("requestCode",scanType);
         startActivityForResult(barcodeScanIntent, scanType);
     }
 
@@ -355,7 +386,7 @@ public class StoreSelectionActivity extends Activity implements
              // if the last transaction was left pending under "N" minutes
              long minute_diff = CommonUtils.getDifferenceinMinutes(lastTransactionDate,CommonUtils.getCurrentDate());
              Log.d("tag","last pending transaction in "+ minute_diff);
-             if( minute_diff < 1)
+             if( minute_diff < 100)
              {
                  StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
 
@@ -468,6 +499,10 @@ public class StoreSelectionActivity extends Activity implements
         mGoogleApiClient.connect();
         System.out.println("Connection done");
 
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 
 }
