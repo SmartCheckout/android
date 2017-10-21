@@ -174,7 +174,7 @@ public class CartActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        cartAdapter = new CartListViewAdapter(CartActivity.this.getApplicationContext(),cartList);
+                        cartAdapter = new CartListViewAdapter(CartActivity.this,cartList);
                         //Link the cartList and the adapter
                         cartListView = (ListView) findViewById(R.id.cartList);
                         cartListView.setAdapter(cartAdapter);
