@@ -391,7 +391,7 @@ public class StoreSelectionActivity extends Activity implements
                  StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
 
                  AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                         StoreSelectionActivity.this,R.style.DialogThemec);
+                         StoreSelectionActivity.this,R.style.DialogTheme);
 
 
                  // set dialog message
