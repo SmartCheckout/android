@@ -36,7 +36,6 @@ public class CommonUtils {
 
         long diffMinutes = TimeUnit.MINUTES.convert(diff,TimeUnit.MILLISECONDS);
 
-
         return diffMinutes;
     }
 

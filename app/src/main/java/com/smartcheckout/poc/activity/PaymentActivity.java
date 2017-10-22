@@ -35,11 +35,11 @@ import cz.msebera.android.httpclient.HttpEntity;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
+import static com.smartcheckout.poc.constants.constants.TRANSACTION_UPDATE_EP;
+
 public class PaymentActivity extends AppCompatActivity implements PaymentResultListener {
 
     private static String TAG = "PaymentActivity";
-    private static int paymentRetry = 0;
-    private static int paymentRetryLimit = 2;
 
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     @Override
@@ -56,7 +56,6 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             Toast.makeText(this, "Not eligible for payment", Toast.LENGTH_SHORT).show();
             launchCartActivity();
         }
-
 
     }
 
@@ -159,12 +158,15 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
         {
             case Checkout.NETWORK_ERROR:
                 Log.i("tag","Network error from Razor Pay");
+                Toast.makeText(getApplicationContext(),getResources().getString(R.string.toast_not_connected_internet),Toast.LENGTH_SHORT).show();
                 break;
             case Checkout.INVALID_OPTIONS:
                 Log.i("tag","Invalid Options from Razor Pay");
+                Toast.makeText(getApplicationContext(),getResources().getString(R.string.toast_payment_exited),Toast.LENGTH_SHORT).show();
                 break;
             case Activity.RESULT_CANCELED:
                 Log.i("tag","Payment cancelled from Razor Pay");
+                Toast.makeText(getApplicationContext(),getResources().getString(R.string.toast_payment_exited),Toast.LENGTH_SHORT).show();
                 break;
         }
 
@@ -188,8 +190,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
     }
 
     public void updateTransaction(HttpEntity requestEntity){
-        String updateTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/update";
-        ahttpClient.post(this, updateTrnsEP, requestEntity, "application/json" , new JsonHttpResponseHandler(){
+        ahttpClient.post(this, TRANSACTION_UPDATE_EP, requestEntity, "application/json" , new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.d(TAG,String.format("Update transaction returned success. Response code : %d", statusCode));
