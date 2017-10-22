@@ -16,6 +16,7 @@ import com.smartcheckout.poc.activity.LoginActivity;
 import com.smartcheckout.poc.activity.StoreSelectionActivity;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by swetha_swaminathan on 10/18/2017.
@@ -32,10 +33,9 @@ public class CommonUtils {
             return 0;
 
         long diff = date2.getTime() - date1.getTime();
-        System.out.println(diff);
 
-        long diffSeconds = diff / 1000 % 60;
-        long diffMinutes = diff / (60 * 1000) % 60;
+        long diffMinutes = TimeUnit.MINUTES.convert(diff,TimeUnit.MILLISECONDS);
+
 
         return diffMinutes;
     }
