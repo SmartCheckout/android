@@ -26,7 +26,7 @@ import java.io.IOException;
 
 import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_ITEM;
 import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_STORE;
-import static com.smartcheckout.poc.constants.constants.TIMEOUT_SCAN_SECS;
+import static com.smartcheckout.poc.constants.constants.TIMEOUT_SCAN_MILLISECS;
 
 public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     private SurfaceView cameraView = null;
@@ -40,7 +40,7 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scan_main);
 
-        CountDownTimer countDownTimer = new CountDownTimer(TIMEOUT_SCAN_SECS, 1000) {
+        CountDownTimer countDownTimer = new CountDownTimer(TIMEOUT_SCAN_MILLISECS, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 //TODO: Do something every second

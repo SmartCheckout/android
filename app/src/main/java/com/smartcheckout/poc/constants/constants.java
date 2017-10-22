@@ -28,7 +28,7 @@ public class constants {
 
 
     public static int TIMEOUT_TRANSACTION_MINS = 100;
-    public static int TIMEOUT_SCAN_SECS = 30;
+    public static int TIMEOUT_SCAN_MILLISECS = 30000;
 
     public static int SPINNER_MAX_VALUE = 5;
 
