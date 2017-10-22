@@ -1,6 +1,7 @@
 package com.smartcheckout.poc.adapters;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.smartcheckout.poc.constants.constants.SPINNER_MAX_VALUE;
 
 /**
  * Created by yeshwanth on 4/4/2017.
@@ -57,7 +59,7 @@ public class CartListViewAdapter extends BaseAdapter {
         this.cartItemList = new ArrayList<CartItem>();
         this.itemTracker = new HashMap<>();
 
-        for (int i=1; i <= 5; i++) {
+        for (int i=1; i <= SPINNER_MAX_VALUE; i++) {
             this.quantList.add(i);
         }
         for (CartItem item : cartItemList) {
@@ -71,7 +73,7 @@ public class CartListViewAdapter extends BaseAdapter {
         this.cartItemList = new ArrayList<CartItem>();
         this.itemTracker = new HashMap<>();
         this.quantList = new ArrayList<Integer>();
-        for (int i=1; i <= 5; i++) {
+        for (int i=1; i <= SPINNER_MAX_VALUE; i++) {
             this.quantList.add(i);
         }
     }
@@ -234,4 +236,6 @@ public class CartListViewAdapter extends BaseAdapter {
         cartItemList.remove(cartItem);
         itemTracker.remove(cartItem.getProduct().getBarcode());
     }
+
+
 }
