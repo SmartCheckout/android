@@ -20,6 +20,7 @@ import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
 import com.smartcheckout.poc.util.TransactionStatus;
 
@@ -139,6 +140,11 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             updateTransReq.put("status", TransactionStatus.PAYMENT_SUCCESSFUL);
             updateTransReq.put("payment", new JSONArray().put(payment));
             updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
+
+            //Flushing transaction from shared preference
+            SharedPreferrencesUtil.setStringPreference(this, "TransactionId",null);
+            SharedPreferrencesUtil.setDatePreference(this, "TransactionUpdatedDate",null);
+
             Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
 
         }catch(Exception e){
