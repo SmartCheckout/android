@@ -70,7 +70,10 @@
     <string name="history">Transaction History</string>
     <string name="retry">retry</string>
     <string name="quit">quit</string>
-    <string name="payment_succesful">Payment Succesful</string>
+    <string name="payment_succesful">Payment Success</string>
+    <string name="payment_success_msg1">Your payment of \u20B9 </string>
+    <string name="payment_success_msg2">was sucessfully completed</string>
+
     <string name="saved_transaction_dialog">You have a pending transaction at this store</string>
     <string name="continue_transaction">Continue</string>
     <string name="start_over">Start Over</string>

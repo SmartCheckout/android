@@ -3,6 +3,8 @@ package com.smartcheckout.poc.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -51,15 +53,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
         }else{
             // Pre-requsites not met. returning to cart activity.
             Toast.makeText(this, "Not eligible for payment", Toast.LENGTH_SHORT).show();
-            Intent cartActivityIntent = new Intent(this,CartActivity.class);
-
-            Store selectedStore = StateData.store;
-            cartActivityIntent.putExtra("StoreId",selectedStore.getId());
-            cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
-            cartActivityIntent.putExtra("StoreDisplayAddress", selectedStore.getDisplayAddress());
-            cartActivityIntent.putExtra("TransactionId", StateData.transactionId);
-
-            startActivity(cartActivityIntent);
+            launchCartActivity();
         }
 
 
@@ -122,10 +116,16 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             setContentView(R.layout.payment_success);
 
             // Display transaction id QR code
-            Bitmap myBitmap = QRCode.from(StateData.transactionId).bitmap();
+            Bitmap myBitmap = QRCode.from(StateData.transactionId).withColor(0xFF000000,0x00FFFFFF).bitmap();
+
             ImageView myImage = (ImageView) findViewById(R.id.trnsQRCode);
-            ((TextView) findViewById(R.id.paymentStatus)).setText("Payment Successful!");
-            ((TextView) findViewById(R.id.amountPaid)).setText(StateData.billAmount.toString());
+            TextView amountView = ((TextView) findViewById(R.id.amountMessage1));
+            if(amountView != null && amountView.getText() != null)
+            {
+                String updatedText = amountView.getText().toString().concat(" "+StateData.billAmount.toString());
+                amountView.setText(updatedText);
+            }
+
             myImage.setImageBitmap(myBitmap);
             Log.d(TAG,"Transaction bitmap generated");
 
@@ -148,42 +148,37 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
 
     @Override
     public void onPaymentError(int code, String response) {
-        Toast.makeText(this, code, Toast.LENGTH_SHORT).show();
-        paymentRetry ++;
-        Log.e(TAG,String.format("Payment failure returned from gateway : %s. Current Retry Count : %d ", response, paymentRetry));
+
+        switch (code)
+        {
+            case Checkout.NETWORK_ERROR:
+                Log.i("tag","Network error from Razor Pay");
+                break;
+            case Checkout.INVALID_OPTIONS:
+                Log.i("tag","Invalid Options from Razor Pay");
+                break;
+            case Activity.RESULT_CANCELED:
+                Log.i("tag","Payment cancelled from Razor Pay");
+                break;
+        }
 
         JSONObject updateTransReq = new JSONObject();
-        try{
-            // Updating payment success view
-            //setContentView(R.layout.payment_faliure);
-            ((TextView) findViewById(R.id.paymentFaliure)).setText("Payment Failed! "+ response);
-            ((Button) findViewById(R.id.retry)).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(paymentRetry<paymentRetryLimit){
-                        launchRazorPay(PaymentActivity.this);
-                    }else{
-                        Toast.makeText(PaymentActivity.this, "Maximum payment reties exceeded", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
 
+        try {
             JSONObject payment = new JSONObject();
-            payment.put("paymentGateway","RAZOR_PAY");;
-            payment.put("paymentStatus",response);
-
             updateTransReq.put("trnsId", StateData.transactionId);
             updateTransReq.put("status", TransactionStatus.PAYMENT_FAILURE);
             updateTransReq.put("payment", new JSONArray().put(payment));
-
-            updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
             Log.d(TAG,"Update transaction status triggered. " + updateTransReq.toString());
 
+            updateTransaction(new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON));
 
         }catch(Exception e){
             //Todo
         }
         Log.e(TAG,response);
+
+        launchCartActivity();
     }
 
     public void updateTransaction(HttpEntity requestEntity){
@@ -201,6 +196,19 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             }
 
         });
+    }
+
+    private void launchCartActivity()
+    {
+        Intent cartActivityIntent = new Intent(this,CartActivity.class);
+
+        Store selectedStore = StateData.store;
+        cartActivityIntent.putExtra("StoreId",selectedStore.getId());
+        cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
+        cartActivityIntent.putExtra("StoreDisplayAddress", selectedStore.getDisplayAddress());
+        cartActivityIntent.putExtra("TransactionId", StateData.transactionId);
+
+        startActivity(cartActivityIntent);
     }
     @Override
     public void onBackPressed() {

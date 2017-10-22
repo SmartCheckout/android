@@ -136,13 +136,6 @@ public class CartActivity extends AppCompatActivity {
                 Log.d(TAG, "Retrieve Existing transaction " + inputBundle.get("TransactionId") );
 
             }
-            // retrieving from saved instance
-//            else if (SharedPreferrencesUtil.getStringPreference(this,"TransactionId") != null)
-//            {
-//                StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
-//                Log.d(TAG, "Retrieve Existing transaction " + SharedPreferrencesUtil.getStringPreference(this,"TransactionId")  );
-//            }
-
             // first time activity is created
             else
             {

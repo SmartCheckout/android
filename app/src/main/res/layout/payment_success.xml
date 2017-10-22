@@ -9,78 +9,114 @@
         android:id="@+id/succesIcon"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="5dp"
+        app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.1"
-        app:srcCompat="@drawable/payment_success"
-        tools:layout_editor_absoluteX="172dp" />
+        app:srcCompat="@drawable/success_icon"
+         />
 
     <TextView
         android:id="@+id/paymentStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/payment_succesful"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toStartOf="@+id/amountPaid"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/succesIcon" />
-
-    <TextView
-        android:id="@+id/amountPaid"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-
-
-        app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
-        app:layout_constraintEnd_toStartOf="@+id/receiptDetails"
-        app:layout_constraintStart_toEndOf="@+id/paymentStatus"
-        app:layout_constraintTop_toTopOf="@+id/paymentStatus"
-        tools:layout_editor_absoluteX="0dp"
-        tools:text="$250" />
-
-    <TextView
-        android:id="@+id/receiptDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:gravity="center"
+        android:text="@string/payment_succesful"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/succesIcon"
+        />
+
+    <TextView
+        android:id="@+id/amountMessage1"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/payment_success_msg1"
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintTop_toBottomOf="@+id/paymentStatus"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        />
+    <!--<TextView-->
+        <!--android:id="@+id/amountPaid"-->
+        <!--android:layout_marginTop="16dp"-->
+        <!--android:layout_width="40dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
+        <!--app:layout_constraintStart_toEndOf="@+id/amountMessage1"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/paymentStatus"-->
+        <!--app:layout_constraintLeft_toRightOf="@+id/amountMessage1"-->
+        <!--android:paddingLeft="2dp"-->
+        <!--/>-->
+
+    <TextView
+        android:id="@+id/amountMessage2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/payment_success_msg2"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintTop_toBottomOf="@+id/amountMessage1"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+         />
+
+    <Button
+        android:id="@+id/emailReciepts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Email Receipt"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/amountMessage2"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+    <!---->
+    <!--<TextView-->
+        <!--android:id="@+id/receiptDetails"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="4dp"-->
+        <!--android:gravity="center"-->
+        <!--android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
 
 
-        app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/amountPaid"
-        app:layout_constraintTop_toTopOf="@+id/paymentStatus"
-        tools:layout_editor_absoluteX="0dp"
-        android:text="Details" />
+        <!--app:layout_constraintBottom_toBottomOf="@+id/paymentStatus"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toEndOf="@+id/amountPaid"-->
+        <!--app:layout_constraintTop_toTopOf="@+id/paymentStatus"-->
+        <!--tools:layout_editor_absoluteX="0dp"-->
+        <!--android:text="Details" />-->
 
     <ImageView
         android:id="@+id/trnsQRCode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_width="274dp"
+        android:layout_height="216dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/paymentStatus"
-        tools:layout_editor_absoluteX="172dp"
-        tools:src="@drawable/sample_qr" />
+        app:layout_constraintTop_toBottomOf="@+id/emailReciepts"
+        tools:src="@drawable/sample_qr"
+        tools:layout_editor_absoluteX="49dp"
+        android:layout_marginTop="0dp" />
 
     <TextView
         android:id="@+id/showReceiptHeading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:text="Please scan at exit"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/trnsQRCode" />
+        app:layout_constraintTop_toBottomOf="@+id/trnsQRCode"
+         />
+
 
 </android.support.constraint.ConstraintLayout>
