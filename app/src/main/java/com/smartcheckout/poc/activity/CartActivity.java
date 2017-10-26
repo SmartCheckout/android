@@ -2,14 +2,11 @@ package com.smartcheckout.poc.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -25,7 +22,6 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
@@ -33,27 +29,23 @@ import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
 import com.smartcheckout.poc.util.CommonUtils;
+import com.smartcheckout.poc.util.Currency;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
-import com.smartcheckout.poc.util.Currency;
 import com.smartcheckout.poc.util.TransactionStatus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
@@ -326,12 +318,12 @@ public class CartActivity extends AppCompatActivity {
         emulatorCounter++;
         System.out.println("In launchBarcodeScanner");
         //Launch the bar scanner activity
-        /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
+        Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         barcodeScanIntent.putExtra("requestCode",RC_SCAN_BARCODE_ITEM);
-        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM); */
+        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM);
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
-        populateDummyScanProd();
+        //populateDummyScanProd();
     }
 
     public JSONArray getCart() throws JSONException {
@@ -455,7 +447,7 @@ public class CartActivity extends AppCompatActivity {
             });
         }
     }
-    
+
     public void populateDummyScanProd() {
 
         if ((emulatorCounter % 10) == 0)
