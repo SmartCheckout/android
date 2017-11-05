@@ -1,0 +1,1 @@
+./signing_script.sh ../SmartCheckout/app/build/outputs/apk/debug/app-debug.apk
