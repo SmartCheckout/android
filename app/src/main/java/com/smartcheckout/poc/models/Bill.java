@@ -9,14 +9,16 @@ import com.smartcheckout.poc.util.Currency;
 
 public class Bill {
 
-    private float subTotal; // Total amount by adding MRP of all itens in the cart
-    private float savings;     // Total savings by calculating the disounts and offers
+    private Double subTotal; // Total amount by adding MRP of all itens in the cart
+    private Double savings;     // Total savings by calculating the disounts and offers
     private float taxPercent;
-    private float tax;       // T
+    private Double tax;       // T
     private Currency currency;
-    private float totalAmount; //Final amount to be paid
+    private Double total;
+    //Final amount to be paid
+    private Double totalWeight;
 
-    public Bill(float subTotal, float savings, float taxPercent, Currency currency) {
+    public Bill(Double subTotal, Double savings, float taxPercent, Currency currency) {
         this.subTotal = subTotal;
         this.savings = savings;
         this.taxPercent = taxPercent;
@@ -28,7 +30,7 @@ public class Bill {
         return round(this.subTotal, 2);
     }
 
-    public void setSubTotal(float subTotal) {
+    public void setSubTotal(Double subTotal) {
         this.subTotal = subTotal;
     }
 
@@ -36,7 +38,7 @@ public class Bill {
         return round(this.savings, 2);
     }
 
-    public void setSavings(float savings) {
+    public void setSavings(Double savings) {
         this.savings = savings;
     }
 
@@ -44,26 +46,38 @@ public class Bill {
         return round(this.tax, 2);
     }
 
-    public float getTotalAmount(){
-        return round(this.totalAmount, 2);
+    public float getTotal(){
+        return round(this.total, 2);
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
     }
 
     public Currency getCurrency(){
         return this.currency;
     }
 
+    public Double getTotalWeight() {
+        return totalWeight;
+    }
+
+    public void setTotalWeight(Double totalWeight) {
+        this.totalWeight = totalWeight;
+    }
+
     /*
-    * Recalculates the tax and total amount of the bill.
-    * Should be called by the client every time the subTotal amount or tax is changed.
-    * */
+        * Recalculates the tax and total amount of the bill.
+        * Should be called by the client every time the subTotal amount or tax is changed.
+        * */
     public void notifyChanges(){
         this.tax = this.subTotal * this.taxPercent;
-        this.totalAmount =  this.subTotal + this.tax;
+        this.total =  this.subTotal + this.tax;
     }
 
 
-    private float round(float d, int decimalPlace) {
-        BigDecimal bd = new BigDecimal(Float.toString(d));
+    private float round(Double d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Double.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
         return bd.floatValue();
     }

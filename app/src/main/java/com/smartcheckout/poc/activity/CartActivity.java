@@ -2,14 +2,11 @@ package com.smartcheckout.poc.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -25,7 +22,6 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
@@ -42,18 +38,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
@@ -278,13 +270,16 @@ public class CartActivity extends AppCompatActivity {
 
                 try {
                     // Unique product found
-                    Product product = new Product(response.getString("uniqueId"),
-                            response.getString("barcode"),
-                            response.getString("title"),
-                            response.getString("description"),
-                            response.getString("category"),
-                            response.getDouble("retailPrice"),
-                            Float.valueOf(response.getString("discount")));
+
+                    Product product = new Gson().fromJson(response.toString(), Product.class);
+//
+//                    Product product = new Product(response.getString("uniqueId"),
+//                            response.getString("barcode"),
+//                            response.getString("title"),
+//                            response.getString("description"),
+//                            response.getString("category"),
+//                            response.getDouble("retailPrice"),
+//                            Float.valueOf(response.getString("discount")));
                     System.out.println("Created product");
                     // Add the product to the Cart
                     CartItem cartItem = new CartItem(product, 1);
@@ -292,8 +287,6 @@ public class CartActivity extends AppCompatActivity {
                     cartAdapter.addItem(cartItem);
                     System.out.println("Added cart item to adapter");
 
-                } catch (JSONException je) {
-                    je.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -310,13 +303,14 @@ public class CartActivity extends AppCompatActivity {
         }else {
             this.bill.setSubTotal(cartAdapter.getTotalAmount());
             this.bill.setSavings(cartAdapter.getTotalSavings());
+            this.bill.setTotalWeight(cartAdapter.getTotalWeight());
             this.bill.notifyChanges();
         }
     }
 
     public void updateAndShowBill(){
         calculateBill();
-        payButton.setText(getResources().getString(R.string.pay_button)+bill.getTotalAmount());
+        payButton.setText(getResources().getString(R.string.pay_button)+bill.getTotal());
         if(payButton.getVisibility() == View.INVISIBLE)
             payButton.setVisibility(View.VISIBLE);
 
@@ -377,10 +371,10 @@ public class CartActivity extends AppCompatActivity {
             jBill.put("subTotal", bill.getSubTotal());
             jBill.put("tax", bill.getTax());
             jBill.put("currency", bill.getCurrency().toString());
-            jBill.put("total", bill.getTotalAmount());
+            jBill.put("total", bill.getTotal());
             jBill.put("savings", bill.getSavings());
-
-            StateData.billAmount = bill.getTotalAmount();
+            jBill.put("totalWeight",bill.getTotalWeight());
+            StateData.billAmount = bill.getTotal();
 
         }
         JSONArray cart = getCart();
@@ -446,6 +440,7 @@ public class CartActivity extends AppCompatActivity {
                         if(launchPayment) {
                             Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
                             startActivity(paymentIntent);
+
                         }
                     } catch (Exception e) {
                         // TODO: throw custom exception

@@ -133,11 +133,11 @@ public class StoreSelectionActivity extends Activity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         setContentView(R.layout.cart_loading);
-        ImageView img = (ImageView)findViewById(R.id.cart_animation);
-        // Get the source, which has been compiled to an AnimationDrawable object.
-        frameAnimation = (AnimationDrawable) img.getDrawable();
-        // Start the animation (looped playback by default).
-        frameAnimation.start();
+//        ImageView img = (ImageView)findViewById(R.id.cart_animation);
+//        // Get the source, which has been compiled to an AnimationDrawable object.
+//        frameAnimation = (AnimationDrawable) img.getDrawable();
+//        // Start the animation (looped playback by default).
+//        frameAnimation.start();
 
         super.onCreate(savedInstanceState);
         //Conenct Google API client. Will receive call back. See appropriate method for success or faliure

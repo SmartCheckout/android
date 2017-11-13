@@ -4,7 +4,7 @@
 
     <ImageView
         android:id="@+id/cart_animation"
-        android:src="@drawable/cart_loader"
+        android:src="@drawable/splash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"

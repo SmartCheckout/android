@@ -126,8 +126,23 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
                 amountView.setText(updatedText);
             }
 
+
+
             myImage.setImageBitmap(myBitmap);
             Log.d(TAG,"Transaction bitmap generated");
+
+
+            Button viewReciept = (Button) findViewById(R.id.viewReciept);
+
+            viewReciept.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent billViewIntent = new Intent(PaymentActivity.this, BillViewActivity.class);
+                    billViewIntent.putExtra("TransactionId",StateData.transactionId);
+                    startActivity(billViewIntent);
+                }
+            });
 
             // Updating transaction status and payment reference
             JSONObject payment = new JSONObject();
