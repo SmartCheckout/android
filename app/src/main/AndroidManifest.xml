@@ -38,16 +38,26 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
             </intent-filter>
+
         </receiver-->
+
+        <activity
+            android:name=".activity.SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
         <activity
             android:name=".activity.LoginActivity"
             android:label="Smart checkout"
             android:theme="@style/AppTheme"
             android:configChanges="orientation|keyboardHidden|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activity.StoreSelectionActivity"
@@ -59,6 +69,10 @@
             android:configChanges="orientation|keyboardHidden|screenSize"/>
         <activity
             android:name=".activity.CartActivity"
+            android:label="Shopping cart"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
+        <activity
+            android:name=".activity.BillViewActivity"
             android:label="Shopping cart"
             android:configChanges="orientation|keyboardHidden|screenSize"/>
         <!--
