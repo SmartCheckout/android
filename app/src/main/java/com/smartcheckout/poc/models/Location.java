@@ -13,7 +13,7 @@ public class Location {
 		this.type = type;
 		this.coordinates = coordinates;
 	}
-	
+
 	public String getType() {
 		return type;
 	}

@@ -35,11 +35,13 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.models.Transaction;
 import com.smartcheckout.poc.util.CommonUtils;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
@@ -286,18 +288,10 @@ public class StoreSelectionActivity extends Activity implements
                         selectedStore = new Store();
                         JSONObject store = response.getJSONObject(0);
 
-                        System.out.println("Store ID -->" + store.getString("id"));
-                        System.out.println("Store title -->" + store.getString("title"));
-                        System.out.println("Display address -->" + store.getString("displayAddress"));
-                        System.out.println("Setting display address and store Id");
-
-                        selectedStore.setId(store.getString("id"));
-                        selectedStore.setTitle(store.getString("title"));
-                        selectedStore.setDisplayAddress(store.getString("displayAddress"));
+                        selectedStore = new Gson().fromJson(store.toString(), Store.class);
 
                         StateData.storeId = selectedStore.getId();
                         StateData.storeName = selectedStore.getTitle();
-                        StateData.store = selectedStore;
                         launchCartActivity();
                     }
                 } catch (JSONException je) {
@@ -360,7 +354,7 @@ public class StoreSelectionActivity extends Activity implements
     }
 
     public void launchCartActivity(){
-
+        StateData.store =selectedStore;
         final Intent cartActivityIntent = new Intent(this,CartActivity.class);
         cartActivityIntent.putExtra("StoreId",selectedStore.getId());
         cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
@@ -407,12 +401,15 @@ public class StoreSelectionActivity extends Activity implements
                  alertDialog.show();
 
              }
-             else
+             else {
                  startActivity(cartActivityIntent);
+             }
 
          }
          else
+         {
              startActivity(cartActivityIntent);
+         }
 
     }
 

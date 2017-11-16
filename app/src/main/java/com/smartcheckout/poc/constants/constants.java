@@ -21,6 +21,7 @@ public class constants {
 
     public static String TRANSACTION_CREATE_EP = TRANSACTION_URL + "create/";
     public static String TRANSACTION_UPDATE_EP = TRANSACTION_URL + "update/";
+    public static String TRANSACTION_SEARCH_EP = TRANSACTION_URL + "search/";
 
     public static String LOCATION_SEARCH_EP = STORE_SEARCH_URL + "locationsearch/";
     public static String BARCODE_SEARCH_EP = STORE_SEARCH_URL + "barcodesearch/";

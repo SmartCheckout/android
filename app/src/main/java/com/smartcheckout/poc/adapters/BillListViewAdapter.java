@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.CartItem;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -47,6 +48,8 @@ public class BillListViewAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+        DecimalFormat df = new DecimalFormat("#.00");
+
         View rowView = mInflater.inflate(R.layout.bill_item, parent, false);
 
         if(position%2 == 0)
@@ -57,13 +60,13 @@ public class BillListViewAdapter extends BaseAdapter {
         product.setText(item.getProduct().getTitle());
 
         TextView price = (TextView) rowView.findViewById(R.id.price);
-        price.setText("₹ "+String.valueOf(Math.round(item.getProduct().getSellingPrice())));
+        price.setText("₹ "+df.format(item.getProduct().getSellingPrice()));
 
         TextView quantity = (TextView) rowView.findViewById(R.id.quantity);
         quantity.setText(String.valueOf(item.getQuantity()));
 
         TextView amount = (TextView) rowView.findViewById(R.id.amount);
-        amount.setText("₹ "+String.valueOf(Math.round(item.getQuantity() * item.getProduct().getSellingPrice())));
+        amount.setText("₹ "+df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
 
         return rowView;
     }
