@@ -28,6 +28,7 @@ import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
+import com.smartcheckout.poc.models.Transaction;
 import com.smartcheckout.poc.util.CommonUtils;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
@@ -336,6 +337,7 @@ public class CartActivity extends AppCompatActivity {
         if(cartAdapter == null || cartAdapter.getCartItemList() == null || cartAdapter.getCartItemList().isEmpty())
             return null;
 
+
         for(CartItem item : cartAdapter.getCartItemList()) {
 
             Product product = item.getProduct();
@@ -359,9 +361,11 @@ public class CartActivity extends AppCompatActivity {
 
     }
 
-    public void persistTransactionData(final boolean launchPayment,TransactionStatus status) throws JSONException {
+    public void persistTransactionData(final boolean launchPayment,final TransactionStatus status) throws JSONException {
         String currentTS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
         //Store object preparation
+
+
         JSONObject store = new JSONObject();
         store.put("id", StateData.storeId);
         JSONObject jBill = null;
@@ -379,6 +383,8 @@ public class CartActivity extends AppCompatActivity {
         }
         JSONArray cart = getCart();
 
+        JSONObject jUser = new JSONObject();
+        jUser.put("userId",StateData.userId);
 
         if (StateData.transactionId == null) {
             // Persist transaction to
@@ -391,8 +397,10 @@ public class CartActivity extends AppCompatActivity {
             createTrnsReq.put("store", store);
             createTrnsReq.put("cart",cart);
             createTrnsReq.put("bill", jBill);
+            createTrnsReq.put("customer",jUser);
 
-            StateData.status = TransactionStatus.CHECKOUT;
+
+
             // Invoking create transaction
             StringEntity requestEntity = new StringEntity(createTrnsReq.toString(), ContentType.APPLICATION_JSON);
             Log.d(TAG, "Invoking create transaction. Request : " + createTrnsReq.toString());
@@ -405,6 +413,14 @@ public class CartActivity extends AppCompatActivity {
                         StateData.transactionId = response.getString("trnsId");
                         Log.d(TAG, "Generated transaction id : " + StateData.transactionId);
                         if(launchPayment) {
+                            // Set state data for transaction receipt
+                            StateData.transactionReceipt = new Transaction();
+                            StateData.transactionReceipt.setTrnsId(StateData.transactionId);
+                            StateData.transactionReceipt.setTrnsDate(new Date().getTime());
+                            StateData.transactionReceipt.setStatus(status.name());
+                            StateData.transactionReceipt.setStore(StateData.store);
+                            StateData.transactionReceipt.setBill(bill);
+                            StateData.transactionReceipt.setCart(cartAdapter.getCartItemList());
                             Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
                             startActivity(paymentIntent);
                         }
@@ -424,7 +440,7 @@ public class CartActivity extends AppCompatActivity {
             updateTransReq.put("store", store);
             updateTransReq.put("bill", jBill);
             updateTransReq.put("cart",cart);
-
+            updateTransReq.put("customer",jUser);
             HttpEntity requestEntity = new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON);
             Log.d(TAG, "Update transaction status triggered. " + updateTransReq.toString());
 
@@ -438,6 +454,14 @@ public class CartActivity extends AppCompatActivity {
                         Log.d(TAG, "Updated transaction id : " + StateData.transactionId);
 
                         if(launchPayment) {
+                            // Set state data for transaction receipt
+                            StateData.transactionReceipt = new Transaction();
+                            StateData.transactionReceipt.setTrnsId(StateData.transactionId);
+                            StateData.transactionReceipt.setTrnsDate(new Date().getTime());
+                            StateData.transactionReceipt.setStatus(status.name());
+                            StateData.transactionReceipt.setStore(StateData.store);
+                            StateData.transactionReceipt.setBill(bill);
+                            StateData.transactionReceipt.setCart(cartAdapter.getCartItemList());
                             Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
                             startActivity(paymentIntent);
 

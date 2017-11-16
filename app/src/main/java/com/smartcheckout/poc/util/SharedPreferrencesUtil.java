@@ -220,7 +220,6 @@ final public class SharedPreferrencesUtil {
     public static boolean setDatePreference(Context context, String key, Date value) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (preferences != null) {
-            Date date = new Date(System.currentTimeMillis()); //or simply new Date();
 
             //converting it back to a milliseconds representation:
             long millis = value.getTime();

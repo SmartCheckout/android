@@ -33,6 +33,14 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="PopupTheme" parent="android:Theme.Holo.Light.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowSoftInputMode">stateAlwaysHidden</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash</item>
     </style>

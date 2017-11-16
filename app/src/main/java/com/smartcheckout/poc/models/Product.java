@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
-public class Product{
+public class Product {
 
 	private String uniqueId;
 	private String barcode;

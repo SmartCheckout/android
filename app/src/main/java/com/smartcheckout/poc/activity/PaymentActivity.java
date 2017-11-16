@@ -20,6 +20,7 @@ import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.models.Transaction;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
 import com.smartcheckout.poc.util.TransactionStatus;
@@ -72,7 +73,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             JSONObject updateTransReq = new JSONObject();
 
             Float amount = StateData.billAmount *100;
-            checkout.setImage(R.drawable.cart_launch_icon);
+            checkout.setImage(R.drawable.icon1);
             checkout.setKeyID("rzp_test_wnre6SUsbTyIJO");
             checkout.setFullScreenDisable(true);
 

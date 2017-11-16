@@ -101,7 +101,6 @@ public class LoginActivity extends AppCompatActivity {
 
         }*/
 
-
     }
 
     @Override
@@ -123,6 +122,10 @@ public class LoginActivity extends AppCompatActivity {
     public void onSignInInitialize() {
 
         /** TBD : Set the logged in user id to StateData **/
+
+        if(mAuth != null && mAuth.getCurrentUser() != null)
+            StateData.userId = mAuth.getCurrentUser().getUid();
+
         Intent storeSelectionIntent = new Intent(this, StoreSelectionActivity.class);
         startActivity(storeSelectionIntent);
 

@@ -11,7 +11,7 @@
         android:id="@+id/post_sign_out_logo"
         android:layout_width="128dp"
         android:layout_height="128dp"
-        app:srcCompat="@drawable/cart_launch_icon"
+        app:srcCompat="@drawable/logo"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

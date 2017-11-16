@@ -73,7 +73,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize"/>
         <activity
             android:name=".activity.BillViewActivity"
-            android:label="Shopping cart"
+            android:theme="@style/PopupTheme"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
+
+        <activity
+            android:name=".activity.TransactionHistoryActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"/>
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
