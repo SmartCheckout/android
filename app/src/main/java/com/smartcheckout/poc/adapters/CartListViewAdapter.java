@@ -5,6 +5,7 @@ import android.database.DataSetObserver;
 import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -195,15 +196,22 @@ public class CartListViewAdapter extends BaseAdapter {
             viewHolder.productTitle.setText(item.getProduct().getTitle());
             viewHolder.productDesc.setText(item.getProduct().getDescription());
             viewHolder.sellingPrice.setText(df.format(item.getQuantity() * item.getProduct().getSellingPrice()));
-            //viewHolder.quantity.setValue(item.getQuantity());
+            try {
+                int imageId = context.getResources().getIdentifier(item.getProduct().getCategory().toLowerCase() + "_icon", "drawable", context.getPackageName());
+                Log.e("swetha",imageId+" ");
+                if(imageId == 0)
+                    viewHolder.productImg.setImageResource(R.drawable.default_icon);
+                else
+                    viewHolder.productImg.setImageResource(imageId);
+            }
+            catch(Exception e)
+            {
+                viewHolder.productImg.setImageResource(R.drawable.default_icon);
+            }
             //Add listener and update quantity
             viewHolder.quantity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> spinnerParent, View spinnerView, int spinnerPosition, long id) {
-                    //System.out.println("-----In Spinner onItemSelected-----");
-                    //System.out.println("Item ----->" + item.getProduct().getTitle());
-                    //System.out.println("Spinner position ----->" + spinnerPosition);
-
                     Product currentProduct =  item.getProduct();
                     int newQuantity = (Integer)spinnerParent.getItemAtPosition(spinnerPosition);
                     int qtyDifference = newQuantity - item.getQuantity();
@@ -227,9 +235,6 @@ public class CartListViewAdapter extends BaseAdapter {
             //Set the item quantity in spinner
             viewHolder.quantity.setSelection(viewHolder.quantityAdapter.getPosition(item.getQuantity()));
 
-            System.out.println("Product image url -->"+item.getProduct().getImagePath());
-            loadProductImage(item.getProduct().getImagePath(), viewHolder.productImg);
-
             // Check with Yesh whether savings need to be shown at item level
             /*if(savings >0){
                 ((TextView)view.findViewById(R.id.itemSavings)).setText("Saved : $" + df.format(savings));
@@ -247,15 +252,6 @@ public class CartListViewAdapter extends BaseAdapter {
 
     public List<CartItem> getCartItemList() {
         return cartItemList;
-    }
-
-    //Load product image from firebase using glide for caching
-    public void loadProductImage(String url, ImageView prodImageView) {
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference imageReference = storage.getReferenceFromUrl(url);
-        // Load the image using Glide and Firebase UI as the model
-        Glide.with(getApplicationContext()).using(new FirebaseImageLoader()).load(imageReference).into(prodImageView);
-
     }
 
     //Removes the specified item
