@@ -5,5 +5,7 @@
     <color name="colorAccent">#ffffff</color>
     <color name="white">#ffffff</color>
     <color name="bottomNavigationIc">#9E9E9E</color>
-    <color name="payment">#40D437</color>
+    <color name="paymentNormal">#79FA72</color>
+    <color name="paymentPressed">#0fa406</color>
+    <color name="paymentStroke">#39be31</color>
 </resources>

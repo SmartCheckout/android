@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
-public class Product{
+public class Product {
 
 	private String uniqueId;
 	private String barcode;
@@ -15,8 +15,9 @@ public class Product{
 	private String category;
 	private Double retailPrice;
 	private Float discount;
+	private Weight weight;
 
-	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount) {
+	public Product(String uniqueId, String barcode, String title, String description, String category, Double retailPrice, Float discount,Weight weight) {
 		this.uniqueId = uniqueId;
 		this.barcode = barcode;
 		this.title = title;
@@ -24,6 +25,7 @@ public class Product{
 		this.category = category;
 		this.retailPrice = retailPrice;
 		this.discount = discount;
+		this.weight = weight;
 
 	}
 
@@ -104,5 +106,11 @@ public class Product{
 
     }
 
+	public Weight getWeight() {
+		return weight;
+	}
 
+	public void setWeight(Weight weight) {
+		this.weight = weight;
+	}
 }

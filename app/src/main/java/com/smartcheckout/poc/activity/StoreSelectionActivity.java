@@ -35,11 +35,13 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.models.Transaction;
 import com.smartcheckout.poc.util.CommonUtils;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
@@ -53,7 +55,13 @@ import java.util.Date;
 import cz.msebera.android.httpclient.Header;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static com.smartcheckout.poc.constants.constants.BARCODE_SEARCH_EP;
+import static com.smartcheckout.poc.constants.constants.LOCATION_SEARCH_EP;
+import static com.smartcheckout.poc.constants.constants.RC_CHECK_SETTING;
+import static com.smartcheckout.poc.constants.constants.RC_LOCATION_PERMISSION;
 import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_STORE;
+import static com.smartcheckout.poc.constants.constants.SP_TRANSACTION_ID;
+import static com.smartcheckout.poc.constants.constants.TIMEOUT_TRANSACTION_MINS;
 
 
 /**
@@ -65,17 +73,12 @@ public class StoreSelectionActivity extends Activity implements
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-     private ProgressBar progressBar;
-
-
-    private static final int RC_LOCATION_PERMISSION = 1;
-    private static final int RC_CHECK_SETTING = 2;
+    private ProgressBar progressBar;
 
    // private static final int RC_SCAN_BARCODE_PROD = 100;
 
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private Store selectedStore;
-    private boolean storeMatched = false;
     private boolean locationEnabled = false;
     private int locationRetryCount = 0;
     private int locationRetryLimit = 5;
@@ -99,7 +102,6 @@ public class StoreSelectionActivity extends Activity implements
     }
 
     public void startLocationUpdates(){
-
 
         if(locationEnabled){
 
@@ -133,16 +135,11 @@ public class StoreSelectionActivity extends Activity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         setContentView(R.layout.cart_loading);
-        ImageView img = (ImageView)findViewById(R.id.cart_animation);
-        System.out.println("ImageView"+img);
-        //img.setBackgroundResource(R.drawable.cart_loader);
-
-
-        // Get the background, which has been compiled to an AnimationDrawable object.
-        AnimationDrawable frameAnimation = (AnimationDrawable) img.getDrawable();
-
-        // Start the animation (looped playback by default).
-        frameAnimation.start();
+//        ImageView img = (ImageView)findViewById(R.id.cart_animation);
+//        // Get the source, which has been compiled to an AnimationDrawable object.
+//        frameAnimation = (AnimationDrawable) img.getDrawable();
+//        // Start the animation (looped playback by default).
+//        frameAnimation.start();
 
         super.onCreate(savedInstanceState);
         //Conenct Google API client. Will receive call back. See appropriate method for success or faliure
@@ -161,6 +158,7 @@ public class StoreSelectionActivity extends Activity implements
 
         if(frameAnimation != null)
             frameAnimation.stop();
+
         if(mGoogleApiClient!=null && mGoogleApiClient.isConnected()){
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, StoreSelectionActivity.this);
             mGoogleApiClient.disconnect();
@@ -194,14 +192,12 @@ public class StoreSelectionActivity extends Activity implements
                         findStoreByBarcode(barcode.displayValue);
                     }
                 }
-                else if(resultCode == RESULT_CANCELED  )
+                else if(resultCode == RESULT_CANCELED )
                 {
                     String reason = bundle.getString("Reason");
                     if(reason != null && reason.equalsIgnoreCase("Timeout"))
                         Toast.makeText(this,getResources().getString(R.string.toast_scan_timedout),Toast.LENGTH_LONG).show();
                 }
-
-
                 break;
             case RC_CHECK_SETTING: // Response from location enabled
                 switch (resultCode) {
@@ -275,14 +271,13 @@ public class StoreSelectionActivity extends Activity implements
 
     public void findStoreByLocation(final Location location){
       
-        String locSearchEP = getString(R.string.storeSearchURL) + "locationsearch/";
         RequestParams params = new RequestParams();
         params.put("lattitude", location.getLatitude());
         params.put("longitude", location.getLongitude());
         params.put("context", "STORE_IN_CURRENT_LOC");
         Log.d(TAG,"Invoking findStoreByLocation with location : "+ location.getLatitude() + " : " + location.getLongitude());
         ahttpClient.setMaxRetriesAndTimeout(2,1000);
-        ahttpClient.get(locSearchEP, params, new JsonHttpResponseHandler() {
+        ahttpClient.get(LOCATION_SEARCH_EP, params, new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
@@ -293,19 +288,10 @@ public class StoreSelectionActivity extends Activity implements
                         selectedStore = new Store();
                         JSONObject store = response.getJSONObject(0);
 
-                        System.out.println("Store ID -->" + store.getString("id"));
-                        System.out.println("Store title -->" + store.getString("title"));
-                        System.out.println("Display address -->" + store.getString("displayAddress"));
+                        selectedStore = new Gson().fromJson(store.toString(), Store.class);
 
-                        System.out.println("Setting display address and store Id");
-                        selectedStore.setId(store.getString("id"));
-                        selectedStore.setTitle(store.getString("title"));
-                        selectedStore.setDisplayAddress(store.getString("displayAddress"));
-
-                        System.out.println("Before launching cart activity");
                         StateData.storeId = selectedStore.getId();
                         StateData.storeName = selectedStore.getTitle();
-                        StateData.store = selectedStore;
                         launchCartActivity();
                     }
                 } catch (JSONException je) {
@@ -324,14 +310,12 @@ public class StoreSelectionActivity extends Activity implements
     public void findStoreByBarcode(String barcode){
         //Get Product Details
 
-        String barcodeSearchEP = getString(R.string.storeSearchURL).concat("barcodesearch/");
         RequestParams params = new RequestParams();
         params.put("barcode", barcode);
         progressBar = (ProgressBar) findViewById(R.id.progressBarStoreScan);
         progressBar.setVisibility(View.VISIBLE);
-        Log.d(TAG,"Endpoint for store selection by barcode : " + barcodeSearchEP);
         ahttpClient.setMaxRetriesAndTimeout(2,1000);
-        ahttpClient.get(barcodeSearchEP, params, new JsonHttpResponseHandler() {
+        ahttpClient.get(BARCODE_SEARCH_EP, params, new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -354,13 +338,12 @@ public class StoreSelectionActivity extends Activity implements
 
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errResponse) {
                 Log.d(TAG,"Unable to find store details. " + statusCode+" "+errResponse,throwable);
-                ((TextView)findViewById(R.id.noLocMessage)).setText("Unable to find the store. Plese scan store barcode again.");
+                ((TextView)findViewById(R.id.noLocMessage)).setText(R.string.store_not_found);
 
             }
         });
 
     }
-
 
 
     //Methods to launch applications activities. scanType should be a predefined constant for store or product(i.e.RC_SCAN_BARCODE_STORE etc.)
@@ -371,7 +354,7 @@ public class StoreSelectionActivity extends Activity implements
     }
 
     public void launchCartActivity(){
-
+        StateData.store =selectedStore;
         final Intent cartActivityIntent = new Intent(this,CartActivity.class);
         cartActivityIntent.putExtra("StoreId",selectedStore.getId());
         cartActivityIntent.putExtra("StoreTitle",selectedStore.getTitle());
@@ -386,13 +369,12 @@ public class StoreSelectionActivity extends Activity implements
              // if the last transaction was left pending under "N" minutes
              long minute_diff = CommonUtils.getDifferenceinMinutes(lastTransactionDate,CommonUtils.getCurrentDate());
              Log.d("tag","last pending transaction in "+ minute_diff);
-             if( minute_diff < 100)
+             if( minute_diff < TIMEOUT_TRANSACTION_MINS)
              {
                  StateData.transactionId =  SharedPreferrencesUtil.getStringPreference(this,"TransactionId");
 
                  AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                          StoreSelectionActivity.this,R.style.DialogTheme);
-
 
                  // set dialog message
                  alertDialogBuilder
@@ -403,31 +385,31 @@ public class StoreSelectionActivity extends Activity implements
                                  cartActivityIntent.putExtra("TransactionId", StateData.transactionId);
                                  startActivity(cartActivityIntent);
 
-
                              }
                          })
                          .setNegativeButton(R.string.start_over,new DialogInterface.OnClickListener() {
                              public void onClick(DialogInterface dialog,int id) {
                                  StateData.transactionId = null;
-                                 SharedPreferrencesUtil.setStringPreference(getApplicationContext(),"TransactionId", null);
+                                 SharedPreferrencesUtil.setStringPreference(getApplicationContext(),SP_TRANSACTION_ID, null);
                                  startActivity(cartActivityIntent);
 
                              }
                          });
                  // create alert dialog
                  AlertDialog alertDialog = alertDialogBuilder.create();
-
                  alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                  alertDialog.show();
 
              }
-             else
+             else {
                  startActivity(cartActivityIntent);
-
+             }
 
          }
          else
+         {
              startActivity(cartActivityIntent);
+         }
 
     }
 
@@ -468,19 +450,6 @@ public class StoreSelectionActivity extends Activity implements
             }
         });
 
-        /*Button findLocation = (Button) findViewById(R.id.findLocation);
-        findLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("Clicked find location");
-                connectGoogleApiClient();
-            }
-        });*/
-/*
-        findViewById(R.id.findLocation).setOnClickListener();
-        if(viewId ==  R.layout.no_loc_store_selection) {
-
-        }*/
     }
 
     public void connectGoogleApiClient() {

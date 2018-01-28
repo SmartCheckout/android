@@ -36,5 +36,15 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+        Button transactionHistoryButton = (Button) findViewById(R.id.history);
+        transactionHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent transactionHistoryIntent = new Intent(SettingsActivity.this, TransactionHistoryActivity.class);
+                startActivity(transactionHistoryIntent);
+            }
+        });
+
     }
 }

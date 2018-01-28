@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_ITEM;
 import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_STORE;
+import static com.smartcheckout.poc.constants.constants.TIMEOUT_SCAN_MILLISECS;
 
 public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     private SurfaceView cameraView = null;
@@ -39,7 +40,7 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scan_main);
 
-        CountDownTimer countDownTimer = new CountDownTimer(30000, 1000) {
+        CountDownTimer countDownTimer = new CountDownTimer(TIMEOUT_SCAN_MILLISECS, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 //TODO: Do something every second
@@ -48,7 +49,6 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
             public void onFinish() {
 
                 Intent initiatingIntent = getIntent();
-
                 if(initiatingIntent != null && initiatingIntent.getExtras() != null)
                 {
                     int requestCode = initiatingIntent.getExtras().getInt("requestCode");
@@ -144,6 +144,11 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
         this.setResult(RESULT_OK,intent);
         finish();
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
 
     }
 
@@ -170,6 +175,5 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ActivityCo
             ScanBarcodeActivity.this.setResult(RESULT_CANCELED,intent);
             finish();
         }
-
     }
 }

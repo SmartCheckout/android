@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -36,7 +38,6 @@ public class CommonUtils {
 
         long diffMinutes = TimeUnit.MINUTES.convert(diff,TimeUnit.MILLISECONDS);
 
-
         return diffMinutes;
     }
 
@@ -60,5 +61,30 @@ public class CommonUtils {
         }
         return true;
     }
+
+    public static int getScreenWidth(Activity ctx)
+    {
+        Display display = ctx.getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics ();
+        display.getMetrics(outMetrics);
+
+        float density  = ctx.getResources().getDisplayMetrics().density;
+        return Math.round(outMetrics.widthPixels );
+
+    }
+
+    public static int getScreenHeight(Activity ctx)
+    {
+        Display display = ctx.getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics ();
+        display.getMetrics(outMetrics);
+
+        float density  = ctx.getResources().getDisplayMetrics().density;
+        return Math.round(outMetrics.heightPixels );
+
+    }
+
+
+
 
 }

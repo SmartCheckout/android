@@ -9,13 +9,13 @@ public class Address {
 	private String state;
 	private String postalCode;
 	private String country;
-	
-	
+
 	
 	public Address() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
 	public Address(String addressLine1, String addressLine2,
 			String addressLine3, String city, String state, String postalCode,
 			String country) {

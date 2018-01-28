@@ -2,14 +2,11 @@ package com.smartcheckout.poc.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -25,13 +22,13 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.adapters.CartListViewAdapter;
 import com.smartcheckout.poc.adapters.SwipeDismissListViewTouchListener;
 import com.smartcheckout.poc.models.Bill;
 import com.smartcheckout.poc.models.CartItem;
 import com.smartcheckout.poc.models.Product;
+import com.smartcheckout.poc.models.Transaction;
 import com.smartcheckout.poc.util.CommonUtils;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
@@ -42,22 +39,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
+import static com.smartcheckout.poc.constants.constants.PRODUCT_SEARCH_URL;
 import static com.smartcheckout.poc.constants.constants.RC_SCAN_BARCODE_ITEM;
+import static com.smartcheckout.poc.constants.constants.SP_TRANSACTION_ID;
+import static com.smartcheckout.poc.constants.constants.SP_TRANSACTION_UPDATED_TS;
+import static com.smartcheckout.poc.constants.constants.TRANSACTION_CREATE_EP;
+import static com.smartcheckout.poc.constants.constants.TRANSACTION_UPDATE_EP;
+import static com.smartcheckout.poc.constants.constants.TRANSACTION_URL;
 
 public class CartActivity extends AppCompatActivity {
 
@@ -78,12 +77,7 @@ public class CartActivity extends AppCompatActivity {
 
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     private CartListViewAdapter cartAdapter;
-    private double totalBill;
-    private double totalSavings;
-    private View transactionView;
-    private View paymentView;
-    private View mainContainerView;
-    private int mShortAnimationDuration;
+
     private BottomNavigationView bottomNavigationView;
     private int emulatorCounter = 0;
     private String TAG = "CartActivity";
@@ -93,8 +87,6 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("Creating Cart activity");
-
-
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         Intent initiatingIntent = getIntent();
@@ -151,11 +143,10 @@ public class CartActivity extends AppCompatActivity {
 
             if(!newTransaction) {
 
-                String getTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction";
                 RequestParams params = new RequestParams();
                 params.put("trnsId", StateData.transactionId);
 
-                ahttpClient.get(getTrnsEP, params, new JsonHttpResponseHandler() {
+                ahttpClient.get(TRANSACTION_URL, params, new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
@@ -218,7 +209,6 @@ public class CartActivity extends AppCompatActivity {
         } else {
             startActivity(new Intent(this, StoreSelectionActivity.class));
         }
-        //cartAdapter = (CartListViewAdapter) cartListView.getAdapter();
 
     }
 
@@ -231,14 +221,16 @@ public class CartActivity extends AppCompatActivity {
             // if the cart is empty dont remember this transaction
             if(cartAdapter != null && cartAdapter.getCartItemList() != null && cartAdapter.getCount() > 0)
             {
-                SharedPreferrencesUtil.setStringPreference(this,"TransactionId",StateData.transactionId);
-                SharedPreferrencesUtil.setDatePreference(this,"TransactionUpdatedDate", CommonUtils.getCurrentDate());
+                SharedPreferrencesUtil.setStringPreference(this,SP_TRANSACTION_ID,StateData.transactionId);
+                SharedPreferrencesUtil.setDatePreference(this,SP_TRANSACTION_UPDATED_TS, CommonUtils.getCurrentDate());
+            }
+            else
+            {
+                SharedPreferrencesUtil.setStringPreference(this,SP_TRANSACTION_ID,null);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
@@ -265,14 +257,13 @@ public class CartActivity extends AppCompatActivity {
 
     public void handleBarcode(String barcode) {
         //Get Product Details
-        String productSearchURL = getString(R.string.productSearchURL);
         RequestParams params = new RequestParams();
 
         params.put("id", barcode);
         System.out.println("Sending request to search product");
         //progressBar.setVisibility(View.VISIBLE);
 
-        ahttpClient.get(productSearchURL, params, new JsonHttpResponseHandler() {
+        ahttpClient.get(PRODUCT_SEARCH_URL, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
@@ -281,38 +272,25 @@ public class CartActivity extends AppCompatActivity {
                 try {
                     // Unique product found
 
-                        /*System.out.println("Product unique id -->"+response.getString("uniqueId"));
-                        System.out.println("Product barcode -->"+response.getString("barcode"));
-                        System.out.println("Product title -->"+response.getString("title"));
-                        System.out.println("Product description -->"+response.getString("description"));
-                        System.out.println("Product category -->"+response.getString("category"));
-                        System.out.println("Product retailPrice -->"+response.getDouble("retailPrice"));
-                        System.out.println("Product retailPrice -->"+response.getDouble("discount"));*/
-
-                    //Hardcoding image url for testing....need to change it to load dynamically
-                    //String imagePath = "gs://smartcheckout-2846e.appspot.com/product_icons/item1.jpg";
-                    Product product = new Product(response.getString("uniqueId"),
-                            response.getString("barcode"),
-                            response.getString("title"),
-                            response.getString("description"),
-                            response.getString("category"),
-                            response.getDouble("retailPrice"),
-                            Float.valueOf(response.getString("discount")));
+                    Product product = new Gson().fromJson(response.toString(), Product.class);
+//
+//                    Product product = new Product(response.getString("uniqueId"),
+//                            response.getString("barcode"),
+//                            response.getString("title"),
+//                            response.getString("description"),
+//                            response.getString("category"),
+//                            response.getDouble("retailPrice"),
+//                            Float.valueOf(response.getString("discount")));
                     System.out.println("Created product");
-                    //progressBar.setVisibility(View.GONE);
                     // Add the product to the Cart
                     CartItem cartItem = new CartItem(product, 1);
                     System.out.println("Created cart item");
                     cartAdapter.addItem(cartItem);
                     System.out.println("Added cart item to adapter");
 
-                } catch (JSONException je) {
-                    je.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
             }
         });
 
@@ -321,18 +299,19 @@ public class CartActivity extends AppCompatActivity {
 
     public void calculateBill() {
         if(this.bill == null){
-            this.bill = new Bill(cartAdapter.getTotalAmount(), cartAdapter.getTotalSavings(), 0, Currency.USD);
+            this.bill = new Bill(cartAdapter.getTotalAmount(), cartAdapter.getTotalSavings(), 0, Currency.INR);
             this.bill.notifyChanges();
         }else {
             this.bill.setSubTotal(cartAdapter.getTotalAmount());
             this.bill.setSavings(cartAdapter.getTotalSavings());
+            this.bill.setTotalWeight(cartAdapter.getTotalWeight());
             this.bill.notifyChanges();
         }
     }
 
     public void updateAndShowBill(){
         calculateBill();
-        payButton.setText("PAY $"+bill.getTotalAmount());
+        payButton.setText(getResources().getString(R.string.pay_button)+bill.getTotal());
         if(payButton.getVisibility() == View.INVISIBLE)
             payButton.setVisibility(View.VISIBLE);
 
@@ -344,7 +323,7 @@ public class CartActivity extends AppCompatActivity {
         //Launch the bar scanner activity
         /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         barcodeScanIntent.putExtra("requestCode",RC_SCAN_BARCODE_ITEM);
-        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM);*/
+        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM); */
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
         populateDummyScanProd();
@@ -355,9 +334,10 @@ public class CartActivity extends AppCompatActivity {
         JSONArray jsonArray = new JSONArray();
         Log.d(TAG, "getcart " );
 
-
         if(cartAdapter == null || cartAdapter.getCartItemList() == null || cartAdapter.getCartItemList().isEmpty())
             return null;
+
+
         for(CartItem item : cartAdapter.getCartItemList()) {
 
             Product product = item.getProduct();
@@ -374,7 +354,6 @@ public class CartActivity extends AppCompatActivity {
             cartObj.put("product",productObj);
             cartObj.put("quantity",item.getQuantity());
 
-
             jsonArray.put(cartObj);
         }
 
@@ -382,9 +361,11 @@ public class CartActivity extends AppCompatActivity {
 
     }
 
-    public void persistTransactionData(final boolean launchPayment,TransactionStatus status) throws JSONException {
+    public void persistTransactionData(final boolean launchPayment,final TransactionStatus status) throws JSONException {
         String currentTS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
         //Store object preparation
+
+
         JSONObject store = new JSONObject();
         store.put("id", StateData.storeId);
         JSONObject jBill = null;
@@ -394,18 +375,19 @@ public class CartActivity extends AppCompatActivity {
             jBill.put("subTotal", bill.getSubTotal());
             jBill.put("tax", bill.getTax());
             jBill.put("currency", bill.getCurrency().toString());
-            jBill.put("total", bill.getTotalAmount());
+            jBill.put("total", bill.getTotal());
             jBill.put("savings", bill.getSavings());
-
-            StateData.billAmount = bill.getTotalAmount();
+            jBill.put("totalWeight",bill.getTotalWeight());
+            StateData.billAmount = bill.getTotal();
 
         }
         JSONArray cart = getCart();
 
+        JSONObject jUser = new JSONObject();
+        jUser.put("userId",StateData.userId);
 
         if (StateData.transactionId == null) {
             // Persist transaction to
-            String createTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/create";
             JSONObject createTrnsReq = new JSONObject();
 
             createTrnsReq.put("trnsDate", currentTS);
@@ -415,12 +397,14 @@ public class CartActivity extends AppCompatActivity {
             createTrnsReq.put("store", store);
             createTrnsReq.put("cart",cart);
             createTrnsReq.put("bill", jBill);
+            createTrnsReq.put("customer",jUser);
 
-            StateData.status = TransactionStatus.CHECKOUT;
+
+
             // Invoking create transaction
             StringEntity requestEntity = new StringEntity(createTrnsReq.toString(), ContentType.APPLICATION_JSON);
             Log.d(TAG, "Invoking create transaction. Request : " + createTrnsReq.toString());
-            ahttpClient.post(this, createTrnsEP, requestEntity, "application/json", new JsonHttpResponseHandler() {
+            ahttpClient.post(this, TRANSACTION_CREATE_EP, requestEntity, "application/json", new JsonHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     try {
@@ -429,6 +413,14 @@ public class CartActivity extends AppCompatActivity {
                         StateData.transactionId = response.getString("trnsId");
                         Log.d(TAG, "Generated transaction id : " + StateData.transactionId);
                         if(launchPayment) {
+                            // Set state data for transaction receipt
+                            StateData.transactionReceipt = new Transaction();
+                            StateData.transactionReceipt.setTrnsId(StateData.transactionId);
+                            StateData.transactionReceipt.setTrnsDate(new Date().getTime());
+                            StateData.transactionReceipt.setStatus(status.name());
+                            StateData.transactionReceipt.setStore(StateData.store);
+                            StateData.transactionReceipt.setBill(bill);
+                            StateData.transactionReceipt.setCart(cartAdapter.getCartItemList());
                             Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
                             startActivity(paymentIntent);
                         }
@@ -448,12 +440,11 @@ public class CartActivity extends AppCompatActivity {
             updateTransReq.put("store", store);
             updateTransReq.put("bill", jBill);
             updateTransReq.put("cart",cart);
-
+            updateTransReq.put("customer",jUser);
             HttpEntity requestEntity = new StringEntity(updateTransReq.toString(), ContentType.APPLICATION_JSON);
             Log.d(TAG, "Update transaction status triggered. " + updateTransReq.toString());
 
-            String updateTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/update";
-            ahttpClient.post(this, updateTrnsEP, requestEntity, "application/json", new JsonHttpResponseHandler() {
+            ahttpClient.post(this, TRANSACTION_UPDATE_EP, requestEntity, "application/json", new JsonHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     try {
@@ -463,8 +454,17 @@ public class CartActivity extends AppCompatActivity {
                         Log.d(TAG, "Updated transaction id : " + StateData.transactionId);
 
                         if(launchPayment) {
+                            // Set state data for transaction receipt
+                            StateData.transactionReceipt = new Transaction();
+                            StateData.transactionReceipt.setTrnsId(StateData.transactionId);
+                            StateData.transactionReceipt.setTrnsDate(new Date().getTime());
+                            StateData.transactionReceipt.setStatus(status.name());
+                            StateData.transactionReceipt.setStore(StateData.store);
+                            StateData.transactionReceipt.setBill(bill);
+                            StateData.transactionReceipt.setCart(cartAdapter.getCartItemList());
                             Intent paymentIntent = new Intent(CartActivity.this, PaymentActivity.class);
                             startActivity(paymentIntent);
+
                         }
                     } catch (Exception e) {
                         // TODO: throw custom exception
@@ -473,7 +473,6 @@ public class CartActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
     
     public void populateDummyScanProd() {
@@ -552,7 +551,6 @@ public class CartActivity extends AppCompatActivity {
         // Setting this scroll listener is required to ensure that during ListView scrolling,
         // we don't look for swipes.
         cartListView.setOnScrollListener(touchListener.makeScrollListener());
-
 
     }
 

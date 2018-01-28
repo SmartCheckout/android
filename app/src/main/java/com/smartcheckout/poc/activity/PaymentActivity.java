@@ -20,6 +20,7 @@ import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.Store;
+import com.smartcheckout.poc.models.Transaction;
 import com.smartcheckout.poc.util.SharedPreferrencesUtil;
 import com.smartcheckout.poc.util.StateData;
 import com.smartcheckout.poc.util.TransactionStatus;
@@ -35,11 +36,11 @@ import cz.msebera.android.httpclient.HttpEntity;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
+import static com.smartcheckout.poc.constants.constants.TRANSACTION_UPDATE_EP;
+
 public class PaymentActivity extends AppCompatActivity implements PaymentResultListener {
 
     private static String TAG = "PaymentActivity";
-    private static int paymentRetry = 0;
-    private static int paymentRetryLimit = 2;
 
     private AsyncHttpClient ahttpClient = new AsyncHttpClient();
     @Override
@@ -57,7 +58,6 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             launchCartActivity();
         }
 
-
     }
 
     public boolean preRequisiteCheck(){
@@ -73,7 +73,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
             JSONObject updateTransReq = new JSONObject();
 
             Float amount = StateData.billAmount *100;
-            checkout.setImage(R.drawable.cart_launch_icon);
+            checkout.setImage(R.drawable.icon1);
             checkout.setKeyID("rzp_test_wnre6SUsbTyIJO");
             checkout.setFullScreenDisable(true);
 
@@ -127,8 +127,23 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
                 amountView.setText(updatedText);
             }
 
+
+
             myImage.setImageBitmap(myBitmap);
             Log.d(TAG,"Transaction bitmap generated");
+
+
+            Button viewReciept = (Button) findViewById(R.id.viewReciept);
+
+            viewReciept.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent billViewIntent = new Intent(PaymentActivity.this, BillViewActivity.class);
+                    billViewIntent.putExtra("TransactionId",StateData.transactionId);
+                    startActivity(billViewIntent);
+                }
+            });
 
             // Updating transaction status and payment reference
             JSONObject payment = new JSONObject();
@@ -159,12 +174,15 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
         {
             case Checkout.NETWORK_ERROR:
                 Log.i("tag","Network error from Razor Pay");
+                Toast.makeText(getApplicationContext(),getResources().getString(R.string.toast_not_connected_internet),Toast.LENGTH_SHORT).show();
                 break;
             case Checkout.INVALID_OPTIONS:
                 Log.i("tag","Invalid Options from Razor Pay");
+                Toast.makeText(getApplicationContext(),getResources().getString(R.string.toast_payment_exited),Toast.LENGTH_SHORT).show();
                 break;
             case Activity.RESULT_CANCELED:
                 Log.i("tag","Payment cancelled from Razor Pay");
+                Toast.makeText(getApplicationContext(),getResources().getString(R.string.toast_payment_exited),Toast.LENGTH_SHORT).show();
                 break;
         }
 
@@ -188,8 +206,7 @@ public class PaymentActivity extends AppCompatActivity implements PaymentResultL
     }
 
     public void updateTransaction(HttpEntity requestEntity){
-        String updateTrnsEP = "http://ec2-54-191-68-157.us-west-2.compute.amazonaws.com:8080/transaction/update";
-        ahttpClient.post(this, updateTrnsEP, requestEntity, "application/json" , new JsonHttpResponseHandler(){
+        ahttpClient.post(this, TRANSACTION_UPDATE_EP, requestEntity, "application/json" , new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.d(TAG,String.format("Update transaction returned success. Response code : %d", statusCode));

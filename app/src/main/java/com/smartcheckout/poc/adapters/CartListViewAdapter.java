@@ -1,6 +1,10 @@
 package com.smartcheckout.poc.adapters;
 
 import android.content.Context;
+import android.database.DataSetObserver;
+import android.os.Build;
+import android.support.annotation.IntDef;
+import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -18,13 +21,18 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.smartcheckout.poc.R;
 import com.smartcheckout.poc.models.CartItem;
+import com.smartcheckout.poc.models.Product;
+import com.smartcheckout.poc.models.Weight;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import cz.msebera.android.httpclient.impl.conn.SystemDefaultRoutePlanner;
+
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.smartcheckout.poc.constants.constants.SPINNER_MAX_VALUE;
 
 /**
  * Created by yeshwanth on 4/4/2017.
@@ -46,8 +54,9 @@ public class CartListViewAdapter extends BaseAdapter {
     private List<CartItem> cartItemList;
     private HashMap<String, CartItem> itemTracker;
     private ArrayList<Integer> quantList;
-    private float totalAmount = 0;
-    private float totalSavings = 0;
+    private Double totalAmount = 0.0;
+    private Double totalSavings = 0.0;
+    private Double totalWeight = 0.0;
 
     //Creates an adapter from an already defined list
     public CartListViewAdapter(Context context, List<CartItem> cartItemList) {
@@ -57,7 +66,7 @@ public class CartListViewAdapter extends BaseAdapter {
         this.cartItemList = new ArrayList<CartItem>();
         this.itemTracker = new HashMap<>();
 
-        for (int i=1; i <= 5; i++) {
+        for (int i=1; i <= SPINNER_MAX_VALUE; i++) {
             this.quantList.add(i);
         }
         for (CartItem item : cartItemList) {
@@ -71,7 +80,7 @@ public class CartListViewAdapter extends BaseAdapter {
         this.cartItemList = new ArrayList<CartItem>();
         this.itemTracker = new HashMap<>();
         this.quantList = new ArrayList<Integer>();
-        for (int i=1; i <= 5; i++) {
+        for (int i=1; i <= SPINNER_MAX_VALUE; i++) {
             this.quantList.add(i);
         }
     }
@@ -82,14 +91,23 @@ public class CartListViewAdapter extends BaseAdapter {
 
     public void addItem(CartItem cartItem) {
         CartItem iteminCart = findItemInCart(cartItem);
+        Product currentProduct = cartItem.getProduct();
+        System.out.println(currentProduct.getBarcode());
+
         if (iteminCart == null) {
             // Item not in cart
             cartItemList.add(cartItem);
             itemTracker.put(cartItem.getProduct().getBarcode(), cartItem);
 
             // Updating the total amount and total savings of the contents of the cart
-            totalAmount += cartItem.getQuantity() * cartItem.getProduct().getSellingPrice();
-            totalSavings += cartItem.getQuantity()* cartItem.getProduct().getSavings();
+            totalAmount += cartItem.getQuantity() * currentProduct.getSellingPrice();
+            totalSavings += cartItem.getQuantity()* currentProduct.getSavings();
+
+            if(currentProduct.getWeight().getUnit().equals(Weight.Unit.GM))
+                totalWeight += cartItem.getQuantity() * currentProduct.getWeight().getvalue() ;
+            else
+                totalWeight += cartItem.getQuantity() * currentProduct.getWeight().getvalue()*1000;
+
 
         } else {
             // Item alreay in cart
@@ -97,15 +115,22 @@ public class CartListViewAdapter extends BaseAdapter {
             int currentQty = iteminCart.getQuantity();
             int qtyIncrease = cartItem.getQuantity();
             iteminCart.setQuantity(currentQty + qtyIncrease);
-            totalAmount += qtyIncrease * cartItem.getProduct().getSellingPrice();
-            totalSavings += qtyIncrease* cartItem.getProduct().getSavings();
+            totalAmount += qtyIncrease * currentProduct.getSellingPrice();
+            totalSavings += qtyIncrease* currentProduct.getSavings();
+
+            if(currentProduct.getWeight().getUnit().equals(Weight.Unit.GM))
+                totalWeight += qtyIncrease * currentProduct.getWeight().getvalue();
+            else
+                totalWeight += qtyIncrease * currentProduct.getWeight().getvalue()*1000;
+
         }
 
         notifyDataSetChanged();
     }
 
-    public float getTotalAmount(){return totalAmount;}
-    public float getTotalSavings(){return totalSavings;}
+    public Double getTotalAmount(){return totalAmount;}
+    public Double getTotalSavings(){return totalSavings;}
+    public Double getTotalWeight(){ return totalWeight; }
 
     @Override
     public int getCount() {
@@ -125,6 +150,7 @@ public class CartListViewAdapter extends BaseAdapter {
         return 0;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder viewHolder;
@@ -137,30 +163,30 @@ public class CartListViewAdapter extends BaseAdapter {
 
         if (item != null) {
 
-        if (view == null) {
-            // If there's no view to re-use, inflate a brand new view for row
+            if (view == null) {
+                // If there's no view to re-use, inflate a brand new view for row
 
-            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.cart_item, parent, false);
-            viewHolder = new ViewHolder();
+                LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.cart_item, parent, false);
+                viewHolder = new ViewHolder();
 
-            viewHolder.productImg = (ImageView) view.findViewById(R.id.productImg);
-            viewHolder.productTitle = (TextView) view.findViewById(R.id.productTitle);
-            viewHolder.productDesc = (TextView) view.findViewById(R.id.productDesc);
+                viewHolder.productImg = (ImageView) view.findViewById(R.id.productImg);
+                viewHolder.productTitle = (TextView) view.findViewById(R.id.productTitle);
+                viewHolder.productDesc = (TextView) view.findViewById(R.id.productDesc);
 
-            //Set attributes for quantity here so that they are also cached by viewHolder
-            viewHolder.quantity = (Spinner) view.findViewById(R.id.quantity);
-            viewHolder.quantityAdapter = new ArrayAdapter<Integer>(getApplicationContext(), R.layout.spinner_item, quantList);
-            // Specify the layout to use when the list of choices appears
-            viewHolder.quantityAdapter.setDropDownViewResource(R.layout.spinner_drop_down);
-            viewHolder.quantity.setAdapter(viewHolder.quantityAdapter);
-            viewHolder.sellingPrice = (TextView) view.findViewById(R.id.sellingPrice);
-            // Cache the viewHolder object inside the fresh view
-            view.setTag(viewHolder);
-        } else {
-            // View is being recycled, retrieve the viewHolder object from tag
-            viewHolder = (ViewHolder) view.getTag();
-        }
+                //Set attributes for quantity here so that they are also cached by viewHolder
+                viewHolder.quantity = (Spinner) view.findViewById(R.id.quantity);
+                viewHolder.quantityAdapter = new ArrayAdapter<Integer>(getApplicationContext(), R.layout.spinner_item, quantList);
+                // Specify the layout to use when the list of choices appears
+                viewHolder.quantityAdapter.setDropDownViewResource(R.layout.spinner_drop_down);
+                viewHolder.quantity.setAdapter(viewHolder.quantityAdapter);
+                viewHolder.sellingPrice = (TextView) view.findViewById(R.id.sellingPrice);
+                // Cache the viewHolder object inside the fresh view
+                view.setTag(viewHolder);
+            } else {
+                // View is being recycled, retrieve the viewHolder object from tag
+                viewHolder = (ViewHolder) view.getTag();
+            }
 
 
             DecimalFormat df = new DecimalFormat("#.00");
@@ -178,10 +204,16 @@ public class CartListViewAdapter extends BaseAdapter {
                     //System.out.println("Item ----->" + item.getProduct().getTitle());
                     //System.out.println("Spinner position ----->" + spinnerPosition);
 
+                    Product currentProduct =  item.getProduct();
                     int newQuantity = (Integer)spinnerParent.getItemAtPosition(spinnerPosition);
                     int qtyDifference = newQuantity - item.getQuantity();
-                    totalAmount += qtyDifference* item.getProduct().getSellingPrice();
-                    totalSavings += qtyDifference* item.getProduct().getSavings();
+                    totalAmount += qtyDifference* currentProduct.getSellingPrice();
+                    totalSavings += qtyDifference* currentProduct.getSavings();
+
+                    if(currentProduct.getWeight().getUnit().equals(Weight.Unit.GM))
+                        totalWeight += qtyDifference * currentProduct.getWeight().getvalue();
+                    else
+                        totalWeight += qtyDifference * currentProduct.getWeight().getvalue()*1000;
 
                     item.setQuantity(newQuantity);
                     notifyDataSetChanged();
@@ -229,9 +261,18 @@ public class CartListViewAdapter extends BaseAdapter {
     //Removes the specified item
     public void remove(CartItem cartItem) {
       // Updating the total amount and savings based on the item being removed
-        totalSavings -= cartItem.getQuantity()*cartItem.getProduct().getSavings();
-        totalAmount -= cartItem.getQuantity()*cartItem.getProduct().getSellingPrice();
+        Product currentProduct = cartItem.getProduct();
+        totalSavings -= cartItem.getQuantity()*currentProduct.getSavings();
+        totalAmount -= cartItem.getQuantity()*currentProduct.getSellingPrice();
+
+        if(currentProduct.getWeight().getUnit().equals(Weight.Unit.GM))
+            totalWeight -= cartItem.getQuantity() * currentProduct.getWeight().getvalue();
+        else
+            totalWeight -= cartItem.getQuantity() * currentProduct.getWeight().getvalue()*1000;
+
         cartItemList.remove(cartItem);
         itemTracker.remove(cartItem.getProduct().getBarcode());
     }
+
+
 }

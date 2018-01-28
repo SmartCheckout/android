@@ -9,6 +9,7 @@ public enum TransactionStatus {
     PAYMENT_INITIATED,
     PAYMENT_SUCCESSFUL,
     PAYMENT_FAILURE,
+    APPROVED,
     INITIATED,
     SUSPENDED
 }
