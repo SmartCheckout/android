@@ -93,19 +93,6 @@ public class Product {
 		return retailPrice - getSellingPrice();
 	}
 
-    public String getImagePath() {
-
-		try {
-			String baseURL = PropertiesUtil.getProperty("baseProductURL",getApplicationContext());
-			String fileFormat = PropertiesUtil.getProperty("prodFileType",getApplicationContext());
-			return  baseURL.concat(""+barcode).concat(fileFormat);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-
-    }
-
 	public Weight getWeight() {
 		return weight;
 	}
