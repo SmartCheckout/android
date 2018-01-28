@@ -68,6 +68,10 @@
             android:label="Scan Barcode"
             android:configChanges="orientation|keyboardHidden|screenSize"/>
         <activity
+            android:name="com.google.android.gms.samples.vision.barcodereader.BarcodeCaptureActivity"
+            android:label="Scan Barcode"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
+        <activity
             android:name=".activity.CartActivity"
             android:label="Shopping cart"
             android:configChanges="orientation|keyboardHidden|screenSize"/>

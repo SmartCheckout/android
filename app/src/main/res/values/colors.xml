@@ -8,4 +8,6 @@
     <color name="paymentNormal">#79FA72</color>
     <color name="paymentPressed">#0fa406</color>
     <color name="paymentStroke">#39be31</color>
+    <color name="indigo">#3F51B5</color>
+    <color name="pink">#E91E63</color>
 </resources>

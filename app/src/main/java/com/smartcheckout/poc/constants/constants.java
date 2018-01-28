@@ -8,7 +8,7 @@ public class constants {
 
     // Response Codes
     public static final int RC_SCAN_BARCODE_STORE = 200;
-    public static final int RC_SCAN_BARCODE_ITEM = 0;
+    public static final int RC_SCAN_BARCODE_ITEM = 100;
 
     public static final int RC_LOCATION_PERMISSION = 1;
     public static final int RC_CHECK_SETTING = 2;
@@ -29,7 +29,7 @@ public class constants {
 
 
     public static int TIMEOUT_TRANSACTION_MINS = 100;
-    public static int TIMEOUT_SCAN_MILLISECS = 30000;
+    public static int TIMEOUT_SCAN_MILLISECS = 5000;
 
     public static int SPINNER_MAX_VALUE = 5;
 

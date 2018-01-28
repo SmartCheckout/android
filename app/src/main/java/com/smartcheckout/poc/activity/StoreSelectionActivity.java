@@ -34,6 +34,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.samples.vision.barcodereader.BarcodeCaptureActivity;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
@@ -186,10 +187,10 @@ public class StoreSelectionActivity extends Activity implements
             case RC_SCAN_BARCODE_STORE:
 
                 if (resultCode == RESULT_OK ) {
-                    Barcode barcode = bundle.getParcelable("Barcode");
+                    String barcode = bundle.getString("Barcode");
                     if(barcode != null) {
-                        Log.d(TAG, "=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
-                        findStoreByBarcode(barcode.displayValue);
+                        Log.d(TAG, "=====> Control returned from Scan Barcode Activity. Barcode : " + barcode);
+                        findStoreByBarcode(barcode);
                     }
                 }
                 else if(resultCode == RESULT_CANCELED )
@@ -348,7 +349,7 @@ public class StoreSelectionActivity extends Activity implements
 
     //Methods to launch applications activities. scanType should be a predefined constant for store or product(i.e.RC_SCAN_BARCODE_STORE etc.)
     public void launchScanBarcode(int scanType){
-        Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
+        Intent barcodeScanIntent = new Intent(this,BarcodeCaptureActivity.class);
         barcodeScanIntent.putExtra("requestCode",scanType);
         startActivityForResult(barcodeScanIntent, scanType);
     }

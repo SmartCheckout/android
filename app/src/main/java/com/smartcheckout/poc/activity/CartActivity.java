@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.samples.vision.barcodereader.BarcodeCaptureActivity;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -239,10 +240,10 @@ public class CartActivity extends AppCompatActivity {
         switch (requestCode) {
             case RC_SCAN_BARCODE_ITEM:
                 if (resultCode == RESULT_OK) {
-                    Barcode barcode = bundle.getParcelable("Barcode");
+                    String barcode = bundle.getString("Barcode");
                     if(barcode != null) {
-                        System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : " + barcode.displayValue);
-                        handleBarcode(barcode.displayValue);
+                        System.out.println("=====> Control returned from Scan Barcode Activity. Barcode : " + barcode);
+                        handleBarcode(barcode);
                     }
                 }
                 else if(resultCode == RESULT_CANCELED )
@@ -324,6 +325,10 @@ public class CartActivity extends AppCompatActivity {
         /*Intent barcodeScanIntent = new Intent(this,ScanBarcodeActivity.class);
         barcodeScanIntent.putExtra("requestCode",RC_SCAN_BARCODE_ITEM);
         startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM); */
+
+        Intent barcodeScanIntent = new Intent(this,BarcodeCaptureActivity.class);
+        barcodeScanIntent.putExtra("requestCode",RC_SCAN_BARCODE_ITEM);
+        startActivityForResult(barcodeScanIntent,RC_SCAN_BARCODE_ITEM);
 
         //Bypassing scan activity to directly hit the service and get dummy data. Should remove this portion in actual app
         populateDummyScanProd();
