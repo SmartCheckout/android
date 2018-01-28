@@ -83,5 +83,10 @@
     <string name="toast_scan_timedout">Barcode scan timed out. Try again</string>
     <string name="toast_store_not_found">Store not found. Try scanning again.</string>
     <string name="toast_payment_exited">Payment view exited</string>
+    <string name="barcode_entry_hint">Enter barcode</string>
+    <string name="barcode_scanning_msg">Scanning... Point at the barcode</string>
+    <string name="barcode_scanning_trouble">Having trouble scanning barcode?</string>
+    <string name="barcode_manual_entry_btn">Enter manually</string>
+
 
 </resources>
